@@ -1,7 +1,7 @@
 package br.com.cdb.java.grupo4.eightbank.enuns;
 
 public enum AccountType {
-    SAVINGS_ACCOUNT("Poupança"),
+    SAVINGS_ACCOUNT("Conta Poupança"),
     CURRENT_ACCOUNT("Conta Corrente");
 
     private final String accountTypeName;

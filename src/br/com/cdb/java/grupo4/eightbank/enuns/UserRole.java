@@ -1,7 +1,7 @@
 package br.com.cdb.java.grupo4.eightbank.enuns;
 
 public enum UserRole {
-    CLIENT('C', "Cliente"),
+    CLIENT('C', "Client"),
     ADMINISTRATOR('A', "Administrador");
 
     private final char userRoleCode;

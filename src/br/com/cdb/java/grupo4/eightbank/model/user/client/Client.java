@@ -12,7 +12,6 @@ public class Client extends User {
     private long cpf;
     private LocalDate dateOfBirth;
     private Address address;
-
     private Account account;
 
     public Client(long id,
@@ -22,12 +21,14 @@ public class Client extends User {
                   ClientCategory clientCategory,
                   long cpf,
                   LocalDate dateOfBirth,
-                  Address address) {
+                  Address address,
+                  Account account) {
         super(id, email, password, name, UserRole.CLIENT);
         this.clientCategory = clientCategory;
         this.cpf = cpf;
         this.dateOfBirth = dateOfBirth;
         this.address = address;
+        this.account = account;
     }
 
     public long getCpf() {
