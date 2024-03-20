@@ -7,7 +7,6 @@ public enum UserRole {
     private final char userRoleCode;
     private final String userRoleName;
 
-
     UserRole(char userRoleCode, String userRoleName) {
         this.userRoleCode = userRoleCode;
         this.userRoleName = userRoleName;

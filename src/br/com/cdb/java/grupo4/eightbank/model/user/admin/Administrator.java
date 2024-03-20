@@ -4,9 +4,6 @@ import br.com.cdb.java.grupo4.eightbank.enuns.UserRole;
 import br.com.cdb.java.grupo4.eightbank.model.user.User;
 
 public class Administrator extends User {
-
-    public Administrator(){}
-
     public Administrator(String email, String password, String name) {
         super(email, password, name, UserRole.ADMINISTRATOR);
     }

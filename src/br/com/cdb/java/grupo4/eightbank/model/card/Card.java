@@ -13,4 +13,5 @@ public abstract class Card {
     private CreditCardBrand creditCardBrand;
     private LocalDate bestDateToBuy;
     private Client owner;
+    private long cardPassword;
 }
