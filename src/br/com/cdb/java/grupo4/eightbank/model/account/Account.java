@@ -1,16 +1,19 @@
 package br.com.cdb.java.grupo4.eightbank.model.account;
 
+import br.com.cdb.java.grupo4.eightbank.enuns.AccountType;
 import br.com.cdb.java.grupo4.eightbank.model.user.client.Client;
 
 public class Account {
     private long branch;
     private long accountNumber;
     private double balance;
+    private AccountType accountType;
     private Client owner;
 
-    public Account() {
+    public Account(AccountType accountType) {
         this.branch = 1;
         this.balance = 0;
+        this.accountType = accountType;
     }
 
     public long getBranch() {

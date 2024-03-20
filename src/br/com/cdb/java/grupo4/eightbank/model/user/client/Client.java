@@ -14,14 +14,6 @@ public class Client extends User {
     private Address address;
     private Account account;
 
-    public long getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(long phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
     private long phoneNumber;
 
     public Client(){}
@@ -66,5 +58,13 @@ public class Client extends User {
 
     public void setAddress(Address address) {
         this.address = address;
+    }
+
+    public long getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(long phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }
