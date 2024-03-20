@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 public class Client extends User {
     private ClientCategory clientCategory;
-    private long cpf;
+    private String cpf;
     private LocalDate dateOfBirth;
     private Address address;
     private Account account;
@@ -28,13 +28,13 @@ public class Client extends User {
                   Account account) {
         super(email, password, name, UserRole.CLIENT);
         this.clientCategory = clientCategory;
-        this.cpf = Long.parseLong(cpf);
+        this.cpf = cpf;
         this.dateOfBirth = dateOfBirth;
         this.address = address;
         this.account = account;
     }
 
-    public long getCpf() {
+    public String getCpf() {
         return cpf;
     }
 
