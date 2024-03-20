@@ -5,11 +5,13 @@ import br.com.cdb.java.grupo4.eightbank.enuns.UserRole;
 public abstract class User {
     private long id;
     private String email;
-    private char[] password;
+    private String password;
     private String name;
     private UserRole userRole;
 
-    public User(long id, String email, char[] password, String name, UserRole userRole) {
+    public User(){}
+
+    public User(String email, String password, String name, UserRole userRole) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -33,11 +35,11 @@ public abstract class User {
         this.email = email;
     }
 
-    public char[] getPassword() {
+    public String getPassword() {
         return password;
     }
 
-    public void setPassword(char[] password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 

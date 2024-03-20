@@ -8,21 +8,23 @@ public class Account {
     private double balance;
     private Client owner;
 
-    public Account(){}
-
-    public Account(long branch, long accountNumber, double balance, Client owner) {
-        this.branch = branch;
-        this.accountNumber = accountNumber;
-        this.balance = balance;
-        this.owner = owner;
+    public Account() {
+        this.branch = 1;
+        this.balance = 0;
     }
 
     public long getBranch() {
         return branch;
     }
-
+    public void setBranch(long branch) {
+        this.branch = branch;
+    }
     public long getAccountNumber() {
         return accountNumber;
+    }
+
+    public void setAccountNumber(long accountNumber) {
+        this.accountNumber = accountNumber;
     }
 
     public double getBalance() {
@@ -35,5 +37,9 @@ public class Account {
 
     public Client getOwner() {
         return owner;
+    }
+
+    public void setOwner(Client owner){
+        this.owner = owner;
     }
 }
