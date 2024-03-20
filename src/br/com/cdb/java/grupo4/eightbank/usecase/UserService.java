@@ -30,7 +30,7 @@ public class UserService {
     String passwordString = null;
     AccountService accountService = new AccountService();
     AccountDAO accountDAO = new AccountDAO();
-    long cpf;
+    String cpf;
     String name;
     LocalDate localDate;
     private String streetName;
@@ -38,7 +38,7 @@ public class UserService {
     private String district;
     private String city;
     private String state;
-    private long zipCode;
+    private String zipCode;
     private AccountType accountType;
 
     public boolean adminRegistration() throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -75,7 +75,7 @@ public class UserService {
         while (true) {
             System.out.println("Digite o numero do seu CPF, sem pontos ou traços: ");
             try {
-                cpf = scanner.nextLong();
+                cpf = scanner.nextLine();
                 if (!CPFValidator.validateCPF(cpf)) {
                     System.out.println("CPF inválido!");
                     scanner.nextLine(); //Limpar scanner
@@ -103,7 +103,7 @@ public class UserService {
         while (true) {
             System.out.println("Digite sua data de nascimento, no formato(dd/mm/aaaa):");
             String dob = scanner.nextLine();
-            if (!DateOfBirthValidator.validateDateOfBirthFormat(dob)) {
+            if (!DateOfBirthValidator.validateDateOfBirth(dob)) {
                 System.out.println("Formato inválido!");
                 scanner.nextLine(); //Limpar scanner
             } else {
@@ -203,12 +203,9 @@ public class UserService {
             String zipCodeString = scanner.nextLine();
             if (!ZipCodeValidator.validateZipCode(zipCodeString)) {
                 System.out.println(SystemMessages.INVALID_ZIP_CODE.getFieldName());
-                scanner.nextLine();
             } else {
-                String[] fields = zipCodeString.split("-");
-                long zipCodeBeforeHifen = Long.parseLong(fields[0]);
-                long zipCodeAfterHifen = Long.parseLong(fields[1]);
-                zipCode = zipCodeBeforeHifen + zipCodeAfterHifen;
+                String cleanZipCode = zipCodeString.replace("-","");
+                zipCode = cleanZipCode;
                 break;
             }
         }
