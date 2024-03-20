@@ -1,5 +1,6 @@
 package br.com.cdb.java.grupo4.eightbank.dao;
 
+import br.com.cdb.java.grupo4.eightbank.exceptions.UserNotFoundException;
 import br.com.cdb.java.grupo4.eightbank.model.user.client.Client;
 
 import java.util.ArrayList;
@@ -13,10 +14,21 @@ public class ClientDAO {
         clientList.add(client);
     }
 
-    public Client searchClient(int id) {
+    public Client searchClientById(int id) {
         for(Client c : clientList) {
             if(c.getId() == id) {
                 return c;
+            }
+        }
+        return null;
+    }
+
+    public Client searchClientByEmail(String email) throws UserNotFoundException {
+        for(Client client : clientList) {
+            if(client.getEmail().equals(email)) {
+                return client;
+            } else {
+                throw new UserNotFoundException("Cliente não localizado!");
             }
         }
         return null;

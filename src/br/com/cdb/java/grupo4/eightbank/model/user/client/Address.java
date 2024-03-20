@@ -7,10 +7,10 @@ public class Address {
     private long number;
     private String district;
     private String city;
-    private State state;  //ENUM
+    private String state;  //ENUM
     private long zipCode;
 
-    public Address(String streetName, long number, String district, String city, State state, long zipCode) {
+    public Address(String streetName, long number, String district, String city, String state, long zipCode) {
         this.streetName = streetName;
         this.number = number;
         this.district = district;
@@ -51,11 +51,11 @@ public class Address {
         this.city = city;
     }
 
-    public State getState() {
+    public String getState() {
         return state;
     }
 
-    public void setState(State state) {
+    public void setState(String state) {
         this.state = state;
     }
 

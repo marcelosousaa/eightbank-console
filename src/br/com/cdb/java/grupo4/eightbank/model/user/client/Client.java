@@ -14,16 +14,27 @@ public class Client extends User {
     private Address address;
     private Account account;
 
-    public Client(long id,
-                  String email,
-                  char[] password,
+    public long getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(long phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    private long phoneNumber;
+
+    public Client(){}
+
+    public Client(String email,
+                  String password,
                   String name,
                   ClientCategory clientCategory,
                   long cpf,
                   LocalDate dateOfBirth,
                   Address address,
                   Account account) {
-        super(id, email, password, name, UserRole.CLIENT);
+        super(email, password, name, UserRole.CLIENT);
         this.clientCategory = clientCategory;
         this.cpf = cpf;
         this.dateOfBirth = dateOfBirth;
