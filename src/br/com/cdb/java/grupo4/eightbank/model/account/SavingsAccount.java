@@ -6,7 +6,6 @@ public class SavingsAccount extends Account {
     private double annualPercentageYield;
 
     public SavingsAccount(long branch, long accountNumber, double balance, Client owner, double annualPercentageYield) {
-        super(branch, accountNumber, balance, owner);
         this.annualPercentageYield = annualPercentageYield;
     }
 }
