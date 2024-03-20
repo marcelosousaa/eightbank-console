@@ -56,6 +56,5 @@ public class EightbankConsoleApplication {
                 System.out.println("Caracter inválido!");
             }
         }
-
     }
 }
