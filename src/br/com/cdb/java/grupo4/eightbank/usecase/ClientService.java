@@ -12,6 +12,7 @@ import br.com.cdb.java.grupo4.eightbank.utils.*;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
@@ -21,7 +22,7 @@ public class ClientService {
     ClientDAO clientDAO = new ClientDAO();
     AccountDAO accountDAO = new AccountDAO();
     String email;
-    long cpf;
+    String cpf;
     String name;
     LocalDate localDate;
     private String streetName;
@@ -29,7 +30,7 @@ public class ClientService {
     private String district;
     private String city;
     private String state;
-    private long zipCode;
+    private String zipCode;
 
     private String passwordString;
 
@@ -54,19 +55,17 @@ public class ClientService {
         }
 
         while (true) {
-            System.out.println("Digite o numero do seu CPF, sem pontos ou traços: ");
-            try {
-                cpf = scanner.nextLong();
+            System.out.println("Digite o seu CPF:");
+            cpf = scanner.nextLine();
+
+            if (cpf.isEmpty()) {
+                System.out.println(SystemMessages.MANDATORY_FIELD_PT_BR.getFieldName());
+            } else {
                 if (!CPFValidator.validateCPF(cpf)) {
-                    System.out.println("CPF inválido!");
-                    scanner.nextLine(); //Limpar scanner
+                    System.out.println("Parece que o seu CPF está em um formato inválido...");
                 } else {
-                    scanner.nextLine(); //Limpar scanner
                     break;
                 }
-            } catch (InputMismatchException e) {
-                System.out.println("Caracter(es) inválido(s)!");
-                scanner.nextLine(); //Limpar scanner
             }
         }
 
@@ -84,42 +83,15 @@ public class ClientService {
         while (true) {
             System.out.println("Digite sua data de nascimento, no formato(dd/mm/aaaa):");
             String dob = scanner.nextLine();
-            if (!DateOfBirthValidator.validateDateOfBirthFormat(dob)) {
-                System.out.println("Formato inválido!");
-                scanner.nextLine(); //Limpar scanner
+            if (!DateOfBirthValidator.validateDateOfBirth(dob)) {
+                System.out.println("Formato da data inválido!");
+            } else if (!DateOfBirthValidator.isOfLegalAge(dob)) {
+                System.out.println("Você precisa ter pelo menos 18 anos para se registrar.");
+                return false;
             } else {
-                String[] fields = dob.split("/");
-                int day = Integer.parseInt(fields[0]);
-                int month = Integer.parseInt(fields[1]);
-                int year = Integer.parseInt(fields[2]);
-
-                if (year > LocalDate.now().getYear()) {
-                    System.out.println("Ano inválido!");
-                } else if (year == LocalDate.now().getYear() - 18) {
-                    if (month <= LocalDate.now().getMonthValue()) {
-                        if (day <= LocalDate.now().getDayOfMonth()) {
-                            try {
-                                localDate = LocalDate.of(year, month, day);
-                                break;
-                            } catch (Exception e) {
-                                System.out.println("Data inválida!");
-                                //System.out.println(e.getMessage());
-                            }
-                        } else {
-                            System.out.println("Cadastro permitido somente para maiores de 18 anos.");
-                        }
-                    } else {
-                        System.out.println("Cadastro permitido somente para maiores de 18 anos.");
-                    }
-                } else {
-                    try {
-                        localDate = LocalDate.of(year, month, day);
-                        break;
-                    } catch (Exception e) {
-                        System.out.println("Data inválida!");
-                        //System.out.println(e.getMessage());
-                    }
-                }
+                // Data de nascimento válida e usuário é maior de idade
+                localDate = LocalDate.parse(dob, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                break;
             }
         }
 
@@ -129,20 +101,21 @@ public class ClientService {
             streetName = scanner.nextLine();
             if (streetName.isEmpty()) {
                 System.out.println(SystemMessages.MANDATORY_FIELD_PT_BR.getFieldName());
-                scanner.nextLine();
             } else {
                 break;
             }
         }
+
         while (true) {
             System.out.println("Digite o número do endereço: ");
-            try {
-                number = scanner.nextLong();
-                break;
-            } catch (InputMismatchException e) {
-                System.out.println("Formato inválido!");
-                scanner.nextLine();
+            if (!scanner.hasNextLong()) {
+                System.out.println("Formato inválido.");
+                scanner.next();
+                continue;
             }
+            number = scanner.nextLong();
+            scanner.nextLine();
+            break;
         }
 
         while (true) {
@@ -150,7 +123,6 @@ public class ClientService {
             district = scanner.nextLine();
             if (district.isEmpty()) {
                 System.out.println(SystemMessages.MANDATORY_FIELD_PT_BR);
-                scanner.nextLine();
             } else {
                 break;
             }
@@ -161,7 +133,6 @@ public class ClientService {
             city = scanner.nextLine();
             if (city.isEmpty()) {
                 System.out.println(SystemMessages.MANDATORY_FIELD_PT_BR.getFieldName());
-                scanner.nextLine();
             } else {
                 break;
             }
@@ -172,23 +143,18 @@ public class ClientService {
             state = scanner.nextLine();
             if (state.isEmpty()) {
                 System.out.println(SystemMessages.MANDATORY_FIELD_PT_BR.getFieldName());
-                scanner.nextLine();
             } else {
                 break;
             }
         }
 
         while (true) {
-            System.out.println("OK! Quase finalizando... Agora informa seu CEP, mas somente os números, sem hífen: ");
-            String zipCodeString = scanner.nextLine();
+            System.out.println("OK! Quase finalizando... Agora informa seu CEP: ");
+            String zipCodeString = scanner.nextLine().trim();
             if (!ZipCodeValidator.validateZipCode(zipCodeString)) {
                 System.out.println(SystemMessages.INVALID_ZIP_CODE.getFieldName());
-                scanner.nextLine();
             } else {
-                String[] fields = zipCodeString.split("-");
-                long zipCodeBeforeHifen = Long.parseLong(fields[0]);
-                long zipCodeAfterHifen = Long.parseLong(fields[1]);
-                zipCode = zipCodeBeforeHifen + zipCodeAfterHifen;
+                zipCode = zipCodeString.replace("-", "");
                 break;
             }
         }
