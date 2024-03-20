@@ -22,13 +22,13 @@ public class Client extends User {
                   String password,
                   String name,
                   ClientCategory clientCategory,
-                  long cpf,
+                  String cpf,
                   LocalDate dateOfBirth,
                   Address address,
                   Account account) {
         super(email, password, name, UserRole.CLIENT);
         this.clientCategory = clientCategory;
-        this.cpf = cpf;
+        this.cpf = Long.parseLong(cpf);
         this.dateOfBirth = dateOfBirth;
         this.address = address;
         this.account = account;

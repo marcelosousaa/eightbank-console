@@ -2,11 +2,19 @@ package br.com.cdb.java.grupo4.eightbank.utils;
 
 public class NameValidator {
 
-    public static boolean validateName(String name){
-        if(name.isEmpty()){
+    private static final int MIN_NAME_LENGTH = 2;
+    private static final int MAX_NAME_LENGTH = 100;
+
+    public static boolean validateName(String name) {
+        if (name.isEmpty()) {
             return false;
-        } else {
-            return true;
         }
+
+        String nameTrimmed = name.trim();
+        if (nameTrimmed.length() < MIN_NAME_LENGTH || nameTrimmed.length() > MAX_NAME_LENGTH){
+            return false;
+        }
+
+        return nameTrimmed.matches("[a-zA-Z\\\\s]+]");
     }
 }
