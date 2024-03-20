@@ -8,9 +8,9 @@ public class Address {
     private String district;
     private String city;
     private String state;  //ENUM
-    private long zipCode;
+    private String zipCode;
 
-    public Address(String streetName, long number, String district, String city, String state, long zipCode) {
+    public Address(String streetName, long number, String district, String city, String state, String zipCode) {
         this.streetName = streetName;
         this.number = number;
         this.district = district;
@@ -59,11 +59,11 @@ public class Address {
         this.state = state;
     }
 
-    public long getZipCode() {
+    public String getZipCode() {
         return zipCode;
     }
 
-    public void setZipCode(long zipCode) {
+    public void setZipCode(String zipCode) {
         this.zipCode = zipCode;
     }
 }

@@ -33,7 +33,7 @@ public class EightbankConsoleApplication {
                     switch (initialOption){
                         case 1:
                             if(!clientService.clientRegistration()){
-                                System.out.println("Houve um problema no cadastro. Vamos repetir?");
+                                System.out.println("Houve um problema no cadastro ou você é um menor de idade.");
                             } else {
                                 System.out.println("Cadastro realizado com sucesso!");
                             }
