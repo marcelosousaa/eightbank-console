@@ -5,15 +5,29 @@ import br.com.cdb.java.grupo4.eightbank.enuns.AccountType;
 import br.com.cdb.java.grupo4.eightbank.exceptions.InsufficientFundsException;
 import br.com.cdb.java.grupo4.eightbank.exceptions.InvalidValueException;
 import br.com.cdb.java.grupo4.eightbank.model.account.Account;
+import br.com.cdb.java.grupo4.eightbank.model.account.CurrentAccount;
+import br.com.cdb.java.grupo4.eightbank.model.account.SavingsAccount;
 import br.com.cdb.java.grupo4.eightbank.model.user.client.Client;
 
 public class AccountService {
     AccountDAO accountDAO = new AccountDAO();
 
-    public Account createAccount(AccountType accountType) {
-        Account account = new Account(accountType);
-        accountDAO.addAccount(account);
-        return account;
+    public Account createCurrentAccount(Client client, double accountFee) {
+        double balance = 0;
+        Account currentAccount = new CurrentAccount(balance,client, accountFee);
+        accountDAO.addAccount(currentAccount);
+        return currentAccount;
+    }
+
+    public Account createSavingsAccount(Client client, double annualPercentageYield){
+        double balance = 0;
+        Account savingsAccount = new SavingsAccount(balance, client, annualPercentageYield);
+        accountDAO.addAccount(savingsAccount);
+        return savingsAccount;
+    }
+
+    public void setAccountOwner(Account account, Client client){
+        accountDAO.searchAccountByNumber(account.getAccountNumber());
     }
 
     public void checkBalance(Account account){
@@ -51,5 +65,17 @@ public class AccountService {
         } catch (InsufficientFundsException | InvalidValueException e) {
             e.getMessage();
         }
+    }
+
+    public void transferPix(Account originAccount, String pixKey, double value){
+        try {
+            withdraw(originAccount, value);
+        } catch (InsufficientFundsException | InvalidValueException e) {
+            e.getMessage();
+        }
+    }
+
+    public void listAccounts() {
+        accountDAO.listAccounts();
     }
 }

@@ -2,11 +2,8 @@ package br.com.cdb.java.grupo4.eightbank;
 
 import br.com.cdb.java.grupo4.eightbank.enuns.UserRole;
 import br.com.cdb.java.grupo4.eightbank.model.user.User;
-import br.com.cdb.java.grupo4.eightbank.usecase.AdministratorService;
-import br.com.cdb.java.grupo4.eightbank.usecase.ClientService;
 import br.com.cdb.java.grupo4.eightbank.usecase.UserService;
 
-import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.InputMismatchException;
@@ -14,7 +11,6 @@ import java.util.Scanner;
 
 public class EightbankConsoleApplication {
     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        Scanner scanner = new Scanner(System.in);
 
         UserService userService = new UserService();
         User user;
@@ -71,7 +67,7 @@ public class EightbankConsoleApplication {
             } catch (InputMismatchException e) {
                 System.out.println("Caracter inválido!"
                         + " Retornando ao menu... \n");
-                scanner.next();
+                new Scanner(System.in).next();
             }
         }
     }

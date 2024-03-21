@@ -30,18 +30,18 @@ public enum State {
     TOCANTINS ("TO", "Tocantins");
 
     private final String stateCode;
-    private final String formatedName;
+    private final String formattedName;
 
-    State(String stateCode, String formatedName) {
+    State(String stateCode, String formattedName) {
         this.stateCode = stateCode;
-        this.formatedName = formatedName;
+        this.formattedName = formattedName;
     }
 
     public String getStateCode() {
         return stateCode;
     }
 
-    public String getFormatedName() {
-        return formatedName;
+    public String getFormattedName() {
+        return formattedName;
     }
 }

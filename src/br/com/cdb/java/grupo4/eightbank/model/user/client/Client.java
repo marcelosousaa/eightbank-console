@@ -6,32 +6,34 @@ import br.com.cdb.java.grupo4.eightbank.model.account.Account;
 import br.com.cdb.java.grupo4.eightbank.model.user.User;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class Client extends User {
-    private ClientCategory clientCategory;
     private String cpf;
     private LocalDate dateOfBirth;
     private Address address;
-    private Account account;
+    private ClientCategory clientCategory;
+    private List<Account> accountList;
+    private String phoneNumber;
+    private double grossMonthlyIncome;
 
-    private long phoneNumber;
-
-    public Client(){}
-
-    public Client(String email,
-                  String password,
-                  String name,
-                  ClientCategory clientCategory,
-                  String cpf,
-                  LocalDate dateOfBirth,
-                  Address address,
-                  Account account) {
+    public Client(
+            double grossMonthlyIncome,
+            String email,
+            String password,
+            String name,
+            ClientCategory clientCategory,
+            String cpf,
+            LocalDate dateOfBirth,
+            Address address,
+            String phoneNumber) {
         super(email, password, name, UserRole.CLIENT);
         this.clientCategory = clientCategory;
         this.cpf = cpf;
         this.dateOfBirth = dateOfBirth;
         this.address = address;
-        this.account = account;
+        this.grossMonthlyIncome = grossMonthlyIncome;
+        this.phoneNumber = phoneNumber;
     }
 
     public String getCpf() {
@@ -41,9 +43,11 @@ public class Client extends User {
     public ClientCategory getClientCategory() {
         return clientCategory;
     }
+
     public void setClientCategory(ClientCategory clientCategory) {
         this.clientCategory = clientCategory;
     }
+
     public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
@@ -60,11 +64,44 @@ public class Client extends User {
         this.address = address;
     }
 
-    public long getPhoneNumber() {
+    public String getPhoneNumber() {
         return phoneNumber;
     }
 
-    public void setPhoneNumber(long phoneNumber) {
+    public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
+
+    public List<Account> getAccountList() {
+        return accountList;
+    }
+
+    public void setAccountList(List<Account> accountList) {
+        this.accountList = accountList;
+    }
+
+    public double getGrossMonthlyIncome() {
+        return grossMonthlyIncome;
+    }
+
+    public void setGrossMonthlyIncome(double grossMonthlyIncome) {
+        this.grossMonthlyIncome = grossMonthlyIncome;
+    }
+
+    @Override
+    public String toString() {
+        return "Client{" +
+                "cpf='" + cpf + '\'' +
+                ", dateOfBirth=" + dateOfBirth +
+                ", address=" + address +
+                ", clientCategory=" + clientCategory +
+                ", accountList=" + accountList +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", grossMonthlyIncome=" + grossMonthlyIncome +
+                "} " + super.toString();
     }
 }

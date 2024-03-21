@@ -7,4 +7,9 @@ public class Administrator extends User {
     public Administrator(String email, String password, String name) {
         super(email, password, name, UserRole.ADMINISTRATOR);
     }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }

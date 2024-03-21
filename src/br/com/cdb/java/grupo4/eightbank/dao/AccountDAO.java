@@ -9,6 +9,13 @@ import java.util.List;
 public class AccountDAO {
     List<Account> accountList = new ArrayList<>();
 
+    public void listAccounts(){
+        for(Account account : accountList){
+            System.out.println(account);
+            System.out.println(account.getOwner());
+        }
+    }
+
     public void addAccount(Account account){
         account.setAccountNumber(accountList.size());
         accountList.add(account);

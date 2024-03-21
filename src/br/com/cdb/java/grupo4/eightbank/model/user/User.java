@@ -9,10 +9,7 @@ public abstract class User {
     private String name;
     private UserRole userRole;
 
-    public User(){}
-
     public User(String email, String password, String name, UserRole userRole) {
-        this.id = id;
         this.email = email;
         this.password = password;
         this.name = name;
@@ -53,5 +50,15 @@ public abstract class User {
 
     public UserRole getUserRole(){
         return this.userRole;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", name='" + name + '\'' +
+                ", userRole=" + userRole +
+                '}';
     }
 }
