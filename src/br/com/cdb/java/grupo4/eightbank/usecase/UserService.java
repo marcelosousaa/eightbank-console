@@ -31,6 +31,8 @@ public class UserService {
     AccountService accountService = new AccountService();
     AccountDAO accountDAO = new AccountDAO();
     CardService cardService = new CardService();
+
+
     String cpf;
     String name;
     LocalDate localDate;
@@ -203,8 +205,8 @@ public class UserService {
             String zipCodeString = scanner.nextLine();
             if (!ZipCodeValidator.validateZipCode(zipCodeString)) {
                 System.out.println(SystemMessages.INVALID_ZIP_CODE.getFieldName());
-                scanner.nextLine();
             } else {
+
                 String cleanZipCode = zipCodeString.replace("-", "");
                 zipCode = cleanZipCode;
                 break;
