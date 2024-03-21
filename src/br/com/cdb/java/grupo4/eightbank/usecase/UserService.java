@@ -30,7 +30,8 @@ public class UserService {
     String passwordString = null;
     AccountService accountService = new AccountService();
     AccountDAO accountDAO = new AccountDAO();
-    long cpf;
+    CardService cardService = new CardService();
+    String cpf;
     String name;
     LocalDate localDate;
     private String streetName;
@@ -38,9 +39,8 @@ public class UserService {
     private String district;
     private String city;
     private String state;
-    private long zipCode;
+    private String zipCode;
     private AccountType accountType;
-
     public boolean adminRegistration() throws NoSuchAlgorithmException, InvalidKeySpecException {
         String passwordString = "senha";
         String strongPassword = PasswordService.generateStrongPassword(passwordString);
@@ -53,7 +53,7 @@ public class UserService {
     }
 
     public boolean clientRegistration() throws NoSuchAlgorithmException, InvalidKeySpecException {
-
+        UserDAO userDAO = new UserDAO();
         Client client;
         LocalDate localDate;
 
@@ -75,7 +75,7 @@ public class UserService {
         while (true) {
             System.out.println("Digite o numero do seu CPF, sem pontos ou traços: ");
             try {
-                cpf = scanner.nextLong();
+                cpf = scanner.nextLine();
                 if (!CPFValidator.validateCPF(cpf)) {
                     System.out.println("CPF inválido!");
                     scanner.nextLine(); //Limpar scanner
@@ -103,7 +103,7 @@ public class UserService {
         while (true) {
             System.out.println("Digite sua data de nascimento, no formato(dd/mm/aaaa):");
             String dob = scanner.nextLine();
-            if (!DateOfBirthValidator.validateDateOfBirthFormat(dob)) {
+            if (!DateOfBirthValidator.validateDateOfBirth(dob)) {
                 System.out.println("Formato inválido!");
                 scanner.nextLine(); //Limpar scanner
             } else {
@@ -205,10 +205,8 @@ public class UserService {
                 System.out.println(SystemMessages.INVALID_ZIP_CODE.getFieldName());
                 scanner.nextLine();
             } else {
-                String[] fields = zipCodeString.split("-");
-                long zipCodeBeforeHifen = Long.parseLong(fields[0]);
-                long zipCodeAfterHifen = Long.parseLong(fields[1]);
-                zipCode = zipCodeBeforeHifen + zipCodeAfterHifen;
+                String cleanZipCode = zipCodeString.replace("-", "");
+                zipCode = cleanZipCode;
                 break;
             }
         }
@@ -232,62 +230,114 @@ public class UserService {
         Account account = accountService.createAccount(accountType);
 
         client = new Client(email, passwordString, name, ClientCategory.COMMOM, cpf, localDate, address, account);
-        UserDAO userDAO = new UserDAO();
         userDAO.addUser(client);
 
         accountDAO.setAccountOwner(account.getAccountNumber(), client);
 
         return true;
-
     }
 
-
     public User login() {
-
-        while (user == null) {
-
-            while (true) {
-                System.out.println("Digite seu email: ");
-                email = new Scanner(System.in).nextLine();
-                if (email.isEmpty()) {
-                    System.err.println("Campo obrigatório!");
-                } else if (!EmailValidator.validateEmail(email)) {
-                    System.err.println("Formato inválido!");
-                } else {
-                    break;
-                }
+        Scanner scanner = new Scanner(System.in);
+        User user = null;
+        while (true) {
+            System.out.println("Digite seu email: ");
+            String email = scanner.nextLine();
+            if (email.isEmpty()) {
+                System.err.println("Campo obrigatório!");
+                continue;
+            } else if (!EmailValidator.validateEmail(email)) {
+                System.err.println("Formato inválido!");
+                continue;
             }
 
-            while (true) {
-                System.out.println("Digite sua senha: ");
-                passwordString = new Scanner(System.in).nextLine();
-                if (passwordString.isEmpty()) {
-                    System.err.println("Campo obrigatório!");
-                } else {
-                    break;
-                }
+            System.out.println("Digite sua senha: ");
+            String passwordString = scanner.nextLine();
+            if (passwordString.isEmpty()){
+                System.out.println("Campo obrigatório");
+                continue;
             }
 
-            try{
+            try {
                 user = userDAO.searchUserByEmail(email);
-                System.out.println(user);
-                try {
-                    PasswordService.validatePassword(passwordString, user.getPassword());
-                } catch (InvalidKeySpecException | NoSuchAlgorithmException e){
+                if (PasswordService.validatePassword(passwordString, user.getPassword())) {
+                    System.out.println("\nLogin realizado com sucesso!\n" + "Bem-vindo " + user.getName() + "!");
+                    menuPrincipal(user);
+                    break; // Sucesso no login, sai do loop
+                } else {
                     System.out.println("Senha inválida!");
-                    user = null;
+                    // A senha está incorreta. Este bloco só será alcançado se modificar o validatePassword para não lançar exceção em caso de senha incorreta.
                 }
-            } catch (UserNotFoundException e){
-                System.out.println(e.getMessage());
+            }catch (UserNotFoundException e){
+                System.out.println("Usuário não encontrado.");
+            }catch (InvalidKeySpecException | NoSuchAlgorithmException e){
+                System.out.println("Erro ao validar a senha.");
+
             }
 
-            if (user != null) {
-                System.out.println("\nLogin realizado com sucesso!\n" + "Bem-vindo " + user.getName() + "!");
-            } else {
-                System.out.println(
-                        "\nNao foi possivel realizar o login, verifique seus dados e tente novamente.\n");
+            System.out.println("\n1. Tentar fazer login novamente");
+            System.out.println("2. Sair");
+            System.out.print("Escolha uma opção: ");
+            int option = scanner.nextInt();
+            scanner.nextLine(); // Limpar buffer do scanner
+
+            switch (option){
+                case 1:
+                    System.out.println("Tente novamente.");
+                    break;
+                case 2:
+                    System.out.println("Encerrando...\n"
+                            + "Obrigado por utilizar nosso sistema.");
+                    System.exit(0);
+                default:
+                    System.out.println("Opção inválida.");
+                    break;
             }
         }
         return user;
+    }
+
+    public void menuPrincipal(User user){
+        System.out.println("\nBem-vindo ao Menu, " + user.getName());
+        while (true) {
+            System.out.println("\nEscolha uma opção:");
+            System.out.println("1. Pedir cartão;");
+            System.out.println("2. Informações da conta;");
+            System.out.println("3. Operações do cartão;");
+            System.out.println("4. Ativação/Desativação de seguros;");
+            System.out.println("5. Editar perfil;");
+            System.out.println("0. Sair.");
+            System.out.print("Sua escolha: ");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1:
+                    cardService.requestCard();
+                    break;
+                case 2:
+
+
+                    break;
+                case 3:
+
+                    break;
+                case 4:
+
+                    break;
+                case 5:
+
+                    break;
+                case 0:
+                    System.out.println("Encerrando...\n"
+                            + "Obrigado por utilizar nosso sistema.");
+                    System.exit(0);
+                    return;
+                default:
+                    System.out.println("Opção inválida. Por favor, tente novamente.");
+                    break;
+            }
+        }
     }
 }
