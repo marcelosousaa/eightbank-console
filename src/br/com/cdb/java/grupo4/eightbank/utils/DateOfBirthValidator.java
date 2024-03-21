@@ -17,14 +17,4 @@ public class DateOfBirthValidator {
             return false;
         }
     }
-
-    public static boolean isOfLegalAge(String dob){
-        try {
-            LocalDate birthDate = LocalDate.parse(dob, DATE_FORMATTER);
-            LocalDate currentDate = LocalDate.now();
-            return Period.between(birthDate, currentDate).getYears() >= 18;
-        }catch (DateTimeParseException e){
-            return false;
-        }
-    }
 }

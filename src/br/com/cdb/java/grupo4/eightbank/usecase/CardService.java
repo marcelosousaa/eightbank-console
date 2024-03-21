@@ -2,7 +2,7 @@ package br.com.cdb.java.grupo4.eightbank.usecase;
 
 import br.com.cdb.java.grupo4.eightbank.model.card.Card;
 import br.com.cdb.java.grupo4.eightbank.model.card.CardFactory;
-import br.com.cdb.java.grupo4.eightbank.model.card.CardType;
+import br.com.cdb.java.grupo4.eightbank.enuns.CardType;
 import java.time.LocalDate;
 import java.util.Scanner;
 
@@ -28,9 +28,9 @@ public class CardService {
             String cardPassword = requestCardPassword();
 
             if (cardPassword != null) {
-                // Simular a criação e salvamento do cartão
+                // Simulação da criação e salvamento do cartão
                 Card newCard = generateAndSaveCard(cardType, cardPassword);
-                System.out.println("Seu pedido de cartão de " + cardType + " foi confirmado!");
+                System.out.println("Seu pedido de cartão de " + cardType.name() + " foi confirmado!");
                 System.out.println("Número do Cartão: " + newCard.getNumber());
                 System.out.println("Data de Validade: " + newCard.getExpirationDate());
                 // Note: Por questões de segurança, não exibiremos o CVV ou a senha.
@@ -58,7 +58,7 @@ public class CardService {
             System.out.println("Pressione qualquer outra tecla para tentar novamente.");
             String choice = scanner.nextLine();
             if ("0".equals(choice)) {
-                return null; // Usuário optou por voltar
+                return ""; // Usuário optou por voltar
             }
         }
     }

@@ -73,7 +73,7 @@ public class UserService {
         }
 
         while (true) {
-            System.out.println("Digite o numero do seu CPF, sem pontos ou traços: ");
+            System.out.println("Digite o numero do seu CPF: ");
             try {
                 cpf = scanner.nextLine();
                 if (!CPFValidator.validateCPF(cpf)) {
@@ -101,7 +101,7 @@ public class UserService {
         }
 
         while (true) {
-            System.out.println("Digite sua data de nascimento, no formato(dd/mm/aaaa):");
+            System.out.println("Digite sua data de nascimento, no formato(DD/MM/AAAA):");
             String dob = scanner.nextLine();
             if (!DateOfBirthValidator.validateDateOfBirth(dob)) {
                 System.out.println("Formato inválido!");

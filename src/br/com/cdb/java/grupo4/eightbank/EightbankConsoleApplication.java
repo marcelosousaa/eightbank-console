@@ -24,9 +24,9 @@ public class EightbankConsoleApplication {
 
         while (true) {
             int menuOption = 0;
-            System.out.println("\n######### Bem-vindo ao EightBank #########");
+            System.out.println("\n—> Bem-Vindo ao Eigthbank  <—");
             System.out.println("\nSelecione uma opção abaixo:\n "
-                    + "\n1 - Conheça nossos benefícios e cadastre-se!"
+                    + "\n1 - Crie seu cadastro!"
                     + "\n2 - Acesso à conta"
                     + "\n0 - Sair");
             try {
