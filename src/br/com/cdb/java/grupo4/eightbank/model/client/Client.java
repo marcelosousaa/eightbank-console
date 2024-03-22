@@ -1,14 +1,14 @@
-package br.com.cdb.java.grupo4.eightbank.model.user.client;
+package br.com.cdb.java.grupo4.eightbank.model.client;
 
 import br.com.cdb.java.grupo4.eightbank.enuns.ClientCategory;
-import br.com.cdb.java.grupo4.eightbank.enuns.UserRole;
-import br.com.cdb.java.grupo4.eightbank.model.account.Account;
-import br.com.cdb.java.grupo4.eightbank.model.user.User;
 
 import java.time.LocalDate;
-import java.util.List;
 
-public class Client extends User {
+public class Client {
+    private long id;
+    private String email;
+    private String password;
+    private String name;
     private String cpf;
     private LocalDate dateOfBirth;
     private Address address;
@@ -25,8 +25,8 @@ public class Client extends User {
             String cpf,
             LocalDate dateOfBirth,
             Address address,
-            String phoneNumber) {
-        super(email, password, name, UserRole.CLIENT);
+            String phoneNumber
+    ) {
         this.clientCategory = clientCategory;
         this.cpf = cpf;
         this.dateOfBirth = dateOfBirth;
@@ -81,6 +81,38 @@ public class Client extends User {
 
     public void setGrossMonthlyIncome(double grossMonthlyIncome) {
         this.grossMonthlyIncome = grossMonthlyIncome;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override

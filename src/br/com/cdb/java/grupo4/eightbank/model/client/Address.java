@@ -1,6 +1,4 @@
-package br.com.cdb.java.grupo4.eightbank.model.user.client;
-
-import br.com.cdb.java.grupo4.eightbank.enuns.State;
+package br.com.cdb.java.grupo4.eightbank.model.client;
 
 public class Address {
     private String streetName;

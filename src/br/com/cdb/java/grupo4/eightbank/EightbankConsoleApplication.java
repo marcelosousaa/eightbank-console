@@ -1,11 +1,8 @@
 package br.com.cdb.java.grupo4.eightbank;
 
-import br.com.cdb.java.grupo4.eightbank.enuns.UserRole;
 import br.com.cdb.java.grupo4.eightbank.exceptions.InvalidValueException;
-import br.com.cdb.java.grupo4.eightbank.model.user.User;
-import br.com.cdb.java.grupo4.eightbank.model.user.client.Client;
+import br.com.cdb.java.grupo4.eightbank.model.client.Client;
 import br.com.cdb.java.grupo4.eightbank.usecase.ClientService;
-import br.com.cdb.java.grupo4.eightbank.usecase.UserService;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -16,11 +13,8 @@ public class EightbankConsoleApplication {
     public static void main(String[] args)
             throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidValueException {
 
-        User user;
-
-        UserService userService = new UserService();
-        // CADASTRA ADMINISTRADOR PADRAO (admin@teste.com, senha123)
-        userService.adminRegistration();
+        Client client;
+        ClientService userService = new ClientService();
 
         ClientService clientService = new ClientService();
 
@@ -57,12 +51,8 @@ public class EightbankConsoleApplication {
                             }
                             break;
                         case 2:
-                            user = userService.login();
-                            if (user.getUserRole().equals(UserRole.ADMINISTRATOR)) {
-                                // Acessos admin
-                            } else if(user instanceof Client){
-                                clientService.clientMenu((Client) user);
-                            }
+                            client = clientService.login();
+                            clientService.clientMenu(client);
                             break;
                         case 0:
                             System.out.println("Encerrando...\n"

@@ -4,7 +4,7 @@ import br.com.cdb.java.grupo4.eightbank.exceptions.AccountNotFoundException;
 import br.com.cdb.java.grupo4.eightbank.exceptions.InsufficientFundsException;
 import br.com.cdb.java.grupo4.eightbank.exceptions.InvalidValueException;
 import br.com.cdb.java.grupo4.eightbank.model.account.Account;
-import br.com.cdb.java.grupo4.eightbank.model.user.client.Client;
+import br.com.cdb.java.grupo4.eightbank.model.client.Client;
 
 import java.util.ArrayList;
 import java.util.List;
