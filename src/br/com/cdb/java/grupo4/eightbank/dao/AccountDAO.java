@@ -20,7 +20,7 @@ public class AccountDAO {
     }
 
     public void addAccount(Account account) {
-        account.setAccountNumber(accountList.size());
+        account.setAccountNumber(accountList.size() + 1);
         accountList.add(account);
     }
 
@@ -125,12 +125,19 @@ public class AccountDAO {
         System.out.println("Seu saldo atual è: R$ " + balance);
     }
 
-    public Account searchAccountByCpf(String cpf) {
+    public List<Account> searchAccountByCpf(String cpf) throws AccountNotFoundException {
+        List<Account> clientAccountsList = new ArrayList<>();
+
         for(Account a: this.accountList){
             if(a.getOwner().getCpf().equals(cpf)){
-                return a;
+                clientAccountsList.add(a);
             }
         }
-        return null;
+
+        if(clientAccountsList.size() == 0){
+            throw new AccountNotFoundException("Não foram localizadas contas para o seu CPF!");
+        } else {
+            return clientAccountsList;
+        }
     }
 }

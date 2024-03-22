@@ -14,8 +14,6 @@ public class EightbankConsoleApplication {
             throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidValueException {
 
         Client client;
-        ClientService userService = new ClientService();
-
         ClientService clientService = new ClientService();
 
         while (true) {
@@ -32,7 +30,7 @@ public class EightbankConsoleApplication {
                 } else {
                     switch (menuOption) {
                         case 1:
-                            if (userService.clientRegistration()) {
+                            if (clientService.clientRegistration()) {
                                 System.out.println("Cadastro realizado com sucesso!");
                             } else {
                                 System.out.println("Houve um problema no cadastro. Vamos repetir?(S/N)");

@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Scanner;
 
 public class ClientService {
-
     List<Account> clientAccountsList;
     CardService cardService = new CardService();
     InsuranceService insuranceService = new InsuranceService();
@@ -35,21 +34,21 @@ public class ClientService {
         double grossMonthlyIncome = inputGrossMonthlyIncome();
         String email = inputEmail();
         String name = inputName();
-        LocalDate localDate = inputDateOfBirth();
+        LocalDate dateOfBirth = inputDateOfBirth();
         Address address = inputAddress();
         String phoneNumber = inputPhoneNumber();
         String passwordString = inputPassword();
 
         Client client = new Client(
-                grossMonthlyIncome,
                 email,
                 passwordString,
                 name,
-                clientCategory,
                 cpf,
-                localDate,
+                dateOfBirth,
                 address,
-                phoneNumber
+                clientCategory,
+                phoneNumber,
+                grossMonthlyIncome
         );
 
         //Adiciona usuario ao "banco de dados" de clientes
@@ -59,7 +58,7 @@ public class ClientService {
         List<Account> clientAccountsList = clientAccountsRegistration(client);
 
         //Itera no array retornado e seta o Cliente como owner das contas
-        for(Account account : clientAccountsList){
+        for (Account account : clientAccountsList) {
             accountService.setAccountOwner(account, client);
         }
 
@@ -92,10 +91,10 @@ public class ClientService {
     private String inputPhoneNumber() {
         String phoneNumber;
 
-        while(true){
+        while (true) {
             System.out.println("Informa um telefone pra contato, no formato (XX) XXXX(X)-XXXX, por favor:  ");
             phoneNumber = new Scanner(System.in).nextLine();
-            if(!PhoneNumberValidator.validatePhoneNumber(phoneNumber)){
+            if (!PhoneNumberValidator.validatePhoneNumber(phoneNumber)) {
                 System.out.println(SystemMessages.INVALID_FORMAT.getFieldName());
             } else {
                 break;
@@ -270,7 +269,7 @@ public class ClientService {
             System.out.println("Informe sua renda mensal bruta: ");
             try {
                 grossMonthlyIncome = new Scanner(System.in).nextDouble();
-                if(grossMonthlyIncome <= 0){
+                if (grossMonthlyIncome <= 0) {
                     throw new InvalidValueException("Valor inválido!");
                 } else {
                     clientCategory = checkClientCategory(grossMonthlyIncome);
@@ -293,7 +292,7 @@ public class ClientService {
                 cpf = new Scanner(System.in).nextLine();
                 if (!CPFValidator.validateCPF(cpf)) {
                     System.out.println("CPF inválido!");
-                } else if(clientDAO.searchClientByCPF(cpf)){
+                } else if (clientDAO.searchClientByCPF(cpf)) {
                     System.err.println("Usuário já existente na base de dados!");
                 } else {
                     break;
@@ -306,28 +305,28 @@ public class ClientService {
         return cpf;
     }
 
-    private List<Account> clientAccountsRegistration(Client client){
+    private List<Account> clientAccountsRegistration(Client client) {
         Account account;
         List<Account> accountList = new ArrayList<>();
         double annualPercentageYield = checkAnnualPercentageYield(client);
         double currentAccountMonthlyFee = checkCurrentAccountMonthlyFee(client);
 
-        while (true){
+        while (true) {
             System.out.println("Que tipo de conta você deseja abrir: ");
             int iterator = 1;
-            for(AccountType type : AccountType.values()){
+            for (AccountType type : AccountType.values()) {
                 System.out.println(iterator + " - " + type.getAccountTypeName());
                 iterator++;
             }
             System.out.println((iterator++) + " - Ambas");
-            try{
+            try {
                 int accountTypeOption = new Scanner(System.in).nextInt();
-                if(accountTypeOption < 1 || accountTypeOption > 3){
+                if (accountTypeOption < 1 || accountTypeOption > 3) {
                     System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
-                } else if(accountTypeOption == 1){
+                } else if (accountTypeOption == 1) {
                     account = accountService.createSavingsAccount(client, annualPercentageYield);
                     accountList.add(account);
-                } else if(accountTypeOption == 2){
+                } else if (accountTypeOption == 2) {
                     account = accountService.createCurrentAccount(client, currentAccountMonthlyFee);
                     accountList.add(account);
                 } else {
@@ -337,7 +336,7 @@ public class ClientService {
                     accountList.add(account);
                 }
                 break;
-            } catch (InputMismatchException e){
+            } catch (InputMismatchException e) {
                 System.out.println(SystemMessages.INVALID_CARACTER.getFieldName());
             }
         }
@@ -347,24 +346,24 @@ public class ClientService {
     private double checkCurrentAccountMonthlyFee(Client client) {
         double currentAccountMonthlyFee;
 
-        if(client.getClientCategory().equals(ClientCategory.COMMOM)){
+        if (client.getClientCategory().equals(ClientCategory.COMMOM)) {
             currentAccountMonthlyFee = 12;
-        } else if(client.getClientCategory().equals(ClientCategory.SUPER)){
+        } else if (client.getClientCategory().equals(ClientCategory.SUPER)) {
             currentAccountMonthlyFee = 8;
-        } else{
+        } else {
             currentAccountMonthlyFee = 0;
         }
         return currentAccountMonthlyFee;
     }
 
-    private double checkAnnualPercentageYield(Client client){
+    private double checkAnnualPercentageYield(Client client) {
         double annualPercentageYield;
 
-        if(client.getClientCategory().equals(ClientCategory.COMMOM)){
+        if (client.getClientCategory().equals(ClientCategory.COMMOM)) {
             annualPercentageYield = 0.05;
-        } else if(client.getClientCategory().equals(ClientCategory.SUPER)){
+        } else if (client.getClientCategory().equals(ClientCategory.SUPER)) {
             annualPercentageYield = 0.07;
-        } else{
+        } else {
             annualPercentageYield = 0.09;
         }
 
@@ -376,7 +375,7 @@ public class ClientService {
 
         if (grossMonthlyIncome <= 5000) {
             clientCategory = ClientCategory.COMMOM;
-        } else if(grossMonthlyIncome > 5000 && grossMonthlyIncome <= 15000){
+        } else if (grossMonthlyIncome > 5000 && grossMonthlyIncome <= 15000) {
             clientCategory = ClientCategory.SUPER;
         } else {
             clientCategory = ClientCategory.PREMIUM;
@@ -414,7 +413,6 @@ public class ClientService {
 
             try {
                 client = clientDAO.searchClientByEmail(email);
-                //System.out.println(user);
                 try {
                     PasswordService.validatePassword(passwordString, client.getPassword());
                 } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
@@ -438,7 +436,7 @@ public class ClientService {
     public void clientMenu(Client client) {
         boolean runningClientMenu = false;
 
-        while (!runningClientMenu){
+        while (!runningClientMenu) {
             System.out.println("Selecione uma opcao abaixo: "
                     + "\n 1 - Saldo"
                     + "\n 2 - Saque"
@@ -454,24 +452,24 @@ public class ClientService {
             try {
                 clientMenuOption = new Scanner(System.in).nextInt();
 
-                switch (clientMenuOption){
+                switch (clientMenuOption) {
                     case 1:
                         try {
                             getClientBalance(client);
-                        } catch (AccountNotFoundException e){
+                        } catch (AccountNotFoundException e) {
                             System.out.println(e.getMessage());
                         }
                     case 2:
-                        try{
+                        try {
                             depositOnClientAccount(client);
-                        } catch (Exception e){
+                        } catch (Exception e) {
                             System.out.println(e.getMessage());
                         }
                     case 0:
                         runningClientMenu = true;
                 }
 
-            } catch (InputMismatchException e){
+            } catch (InputMismatchException e) {
                 System.err.println(SystemMessages.INVALID_CARACTER.getFieldName());
             }
         }
@@ -480,24 +478,24 @@ public class ClientService {
     private void depositOnClientAccount(Client client) throws AccountNotFoundException {
         clientAccountsList = accountService.findAccountsByCPF(client.getCpf());
 
-        if(clientAccountsList.size() > 1){
+        if (clientAccountsList.size() > 1) {
             System.out.println("\nVimos aqui que você possui mais de uma conta conosco."
-                    +"Por favor digite o numero da conta que deseja obter o saldo");
+                    + "Por favor digite o numero da conta que deseja obter o saldo");
 
             System.out.println("Contas encontradas: ");
-            for(Account account : clientAccountsList){
+            for (Account account : clientAccountsList) {
                 System.out.println(" - " + account.getAccountNumber());
             }
 
-            try{
+            try {
                 long accountNumber = new Scanner(System.in).nextLong();
-                for(Account account : clientAccountsList){
-                    if(account.getAccountNumber() == accountNumber){
+                for (Account account : clientAccountsList) {
+                    if (account.getAccountNumber() == accountNumber) {
                         System.out.println("Digite o valor que deseja depositar: ");
-                        try{
+                        try {
                             double value = new Scanner(System.in).nextDouble();
                             accountService.deposit(accountNumber, value);
-                        } catch (InputMismatchException e){
+                        } catch (InputMismatchException e) {
                             System.err.println(SystemMessages.INVALID_CARACTER.getFieldName());
                         }
                         break;
@@ -506,7 +504,7 @@ public class ClientService {
                     }
                 }
 
-            } catch (InputMismatchException e){
+            } catch (InputMismatchException e) {
                 System.err.println(SystemMessages.INVALID_CARACTER.getFieldName());
             }
         } else {
@@ -514,10 +512,10 @@ public class ClientService {
             System.out.println(" - " + clientAccountsList.get(0).getAccountNumber());
 
             System.out.println("Digite o valor que deseja depositar: ");
-            try{
+            try {
                 double value = new Scanner(System.in).nextDouble();
                 accountService.deposit(clientAccountsList.get(0).getAccountNumber(), value);
-            } catch (InputMismatchException e){
+            } catch (InputMismatchException e) {
                 System.err.println(SystemMessages.INVALID_CARACTER.getFieldName());
             }
         }
@@ -527,36 +525,76 @@ public class ClientService {
     private void getClientBalance(Client client) throws AccountNotFoundException {
         clientAccountsList = accountService.findAccountsByCPF(client.getCpf());
 
-        if(clientAccountsList.size() > 1){
+        boolean runningGetClientBalanceMenu = false;
+        char clientOption = ' ';
 
-            System.out.println("\nVimos aqui que você possui mais de uma conta conosco."
-                    +"Por favor digite o numero da conta que deseja obter o saldo");
+        while (!runningGetClientBalanceMenu) {
+            if (clientAccountsList.size() > 1) {
 
-            System.out.println("Contas encontradas: ");
-            for(Account account : clientAccountsList){
-                System.out.println(" - " + account.getAccountNumber());
-            }
+                System.out.println("\nVimos aqui que você possui mais de uma conta conosco.\n"
+                        + "Por favor digite o numero da conta que deseja obter o saldo");
 
-            try{
-                long accountNumber = new Scanner(System.in).nextLong();
-                for(Account account : clientAccountsList){
-                    if(account.getAccountNumber() == accountNumber){
-                        System.out.println(account.getBalance());
-                        break;
-                    } else {
-                        throw new AccountNotFoundException("Esta conta não está na lista.");
-                    }
+                System.out.println("Contas encontradas: ");
+                for (Account account : clientAccountsList) {
+                    System.out.println(" - " + account.getAccountNumber());
                 }
 
-            } catch (InputMismatchException e){
-                System.err.println(SystemMessages.INVALID_CARACTER.getFieldName());
-            }
-        } else {
-            System.out.println("Contas encontradas: ");
-            for(Account account : clientAccountsList){
-                System.out.println("Numero da conta: " + account.getAccountNumber());
-                System.out.println("Saldo: R$ " + account.getBalance());
+                try {
+                    long accountNumber = new Scanner(System.in).nextLong();
+                    for (Account account : clientAccountsList) {
+                        if (account.getAccountNumber() == accountNumber) {
+                            System.out.println("Conta selecionada: " + account.getAccountNumber() + "\n"
+                                    + "Saldo atual: R$ " + account.getBalance());
+                            System.out.println("Deseja visualizar o saldo de outra conta?(S/N)");
+                            clientOption = validateClientOptionYesOrNo();
+                            if(clientOption != 'S'){
+                                runningGetClientBalanceMenu = true;
+                                break;
+                            }
+                        } else {
+                            throw new AccountNotFoundException("Esta conta não está na lista!");
+                        }
+                    }
+                } catch (InputMismatchException e) {
+                    System.err.println(SystemMessages.INVALID_CARACTER.getFieldName());
+                }
+            } else {
+                System.out.println("Contas encontradas: ");
+                for (Account account : clientAccountsList) {
+                    System.out.println("Numero da conta: " + account.getAccountNumber());
+                    System.out.println("Saldo: R$ " + account.getBalance());
+                }
+                System.out.println("Deseja continuar visualizando saldos?(S/N)");
+                clientOption = validateClientOptionYesOrNo();
+                if(clientOption != 'S'){
+                    runningGetClientBalanceMenu = true;
+                }
+
             }
         }
+    }
+
+    private char validateClientOptionYesOrNo() {
+        char clientOption = ' ';
+
+        while (true){
+            System.out.println("Digite uma opção válida, por favor: ");
+            try {
+                clientOption = new Scanner(System.in).next().charAt(0);
+                if (clientOption == 's' || clientOption == 'S') {
+                    clientOption = 'S';
+                    break;
+                } else if (clientOption == 'n' || clientOption == 'N') {
+                    clientOption = 'N';
+                    break;
+                } else {
+                    System.out.println("Opção inválida!");
+                }
+            } catch (InputMismatchException e) {
+                System.out.println(SystemMessages.INVALID_CARACTER.getFieldName());
+            }
+        }
+
+        return clientOption;
     }
 }

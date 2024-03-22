@@ -17,22 +17,25 @@ public class Client {
     private double grossMonthlyIncome;
 
     public Client(
-            double grossMonthlyIncome,
             String email,
             String password,
             String name,
-            ClientCategory clientCategory,
             String cpf,
             LocalDate dateOfBirth,
             Address address,
-            String phoneNumber
+            ClientCategory clientCategory,
+            String phoneNumber,
+            double grossMonthlyIncome
     ) {
-        this.clientCategory = clientCategory;
+        this.email = email;
+        this.password = password;
+        this.name = name;
         this.cpf = cpf;
         this.dateOfBirth = dateOfBirth;
         this.address = address;
-        this.grossMonthlyIncome = grossMonthlyIncome;
+        this.clientCategory = clientCategory;
         this.phoneNumber = phoneNumber;
+        this.grossMonthlyIncome = grossMonthlyIncome;
     }
 
     public String getCpf() {
@@ -118,12 +121,15 @@ public class Client {
     @Override
     public String toString() {
         return "Client{" +
-                "cpf='" + cpf + '\'' +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", name='" + name + '\'' +
+                ", cpf='" + cpf + '\'' +
                 ", dateOfBirth=" + dateOfBirth +
                 ", address=" + address +
                 ", clientCategory=" + clientCategory +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", grossMonthlyIncome=" + grossMonthlyIncome +
-                "} " + super.toString();
+                '}';
     }
 }

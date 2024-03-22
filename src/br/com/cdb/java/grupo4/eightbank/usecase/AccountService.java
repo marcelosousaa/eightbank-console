@@ -81,9 +81,7 @@ public class AccountService {
         accountDAO.listAccounts();
     }
 
-    public List<Account> findAccountsByCPF(String cpf) {
-        List<Account> accountList = new ArrayList<>();
-        accountList.add(accountDAO.searchAccountByCpf(cpf));
-        return accountList;
+    public List<Account> findAccountsByCPF(String cpf) throws AccountNotFoundException {
+        return accountDAO.searchAccountByCpf(cpf);
     }
 }
