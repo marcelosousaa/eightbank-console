@@ -38,4 +38,12 @@ public abstract class Account {
     public void setOwner(Client owner){
         this.owner = owner;
     }
+
+    public AccountType getAccountType() {
+        return accountType;
+    }
+
+    public void setAccountType(AccountType accountType) {
+        this.accountType = accountType;
+    }
 }

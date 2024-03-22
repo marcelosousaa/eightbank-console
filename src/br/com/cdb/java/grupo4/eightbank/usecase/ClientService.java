@@ -439,8 +439,8 @@ public class ClientService {
         while (!runningClientMenu) {
             System.out.println("Selecione uma opcao abaixo: "
                     + "\n 1 - Saldo"
-                    + "\n 2 - Saque"
-                    + "\n 3 - Depósito"
+                    + "\n 2 - Depósito"
+                    + "\n 3 - Saque"
                     + "\n 4 - Transferencias"
                     + "\n 5 - Cartões"
                     + "\n 6 - Meu cadastro"
@@ -459,16 +459,19 @@ public class ClientService {
                         } catch (AccountNotFoundException e) {
                             System.out.println(e.getMessage());
                         }
+                        break;
                     case 2:
                         try {
                             depositOnClientAccount(client);
                         } catch (Exception e) {
                             System.out.println(e.getMessage());
                         }
+                        break;
                     case 0:
                         runningClientMenu = true;
+                    default:
+                        System.err.println(SystemMessages.INVALID_OPTION.getFieldName());
                 }
-
             } catch (InputMismatchException e) {
                 System.err.println(SystemMessages.INVALID_CARACTER.getFieldName());
             }
@@ -543,16 +546,19 @@ public class ClientService {
                     long accountNumber = new Scanner(System.in).nextLong();
                     for (Account account : clientAccountsList) {
                         if (account.getAccountNumber() == accountNumber) {
-                            System.out.println("Conta selecionada: " + account.getAccountNumber() + "\n"
-                                    + "Saldo atual: R$ " + account.getBalance());
+                            System.out.println(
+                                    "Conta selecionada: "
+                                            + account.getAccountNumber()
+                                            + " - " + account.getAccountType().getAccountTypeName()
+                                            + "\n"
+                                            + "Saldo atual: R$ " + account.getBalance()
+                            );
                             System.out.println("Deseja visualizar o saldo de outra conta?(S/N)");
                             clientOption = validateClientOptionYesOrNo();
-                            if(clientOption != 'S'){
+                            if (clientOption != 'S') {
                                 runningGetClientBalanceMenu = true;
                                 break;
                             }
-                        } else {
-                            throw new AccountNotFoundException("Esta conta não está na lista!");
                         }
                     }
                 } catch (InputMismatchException e) {
@@ -561,13 +567,19 @@ public class ClientService {
             } else {
                 System.out.println("Contas encontradas: ");
                 for (Account account : clientAccountsList) {
-                    System.out.println("Numero da conta: " + account.getAccountNumber());
-                    System.out.println("Saldo: R$ " + account.getBalance());
+                    System.out.println(
+                            "Conta selecionada: "
+                                    + account.getAccountNumber()
+                                    + " - " + account.getAccountType().getAccountTypeName()
+                                    + "\n"
+                                    + "Saldo atual: R$ " + account.getBalance()
+                    );
                 }
                 System.out.println("Deseja continuar visualizando saldos?(S/N)");
                 clientOption = validateClientOptionYesOrNo();
-                if(clientOption != 'S'){
+                if (clientOption != 'S') {
                     runningGetClientBalanceMenu = true;
+                    break;
                 }
 
             }
@@ -577,7 +589,7 @@ public class ClientService {
     private char validateClientOptionYesOrNo() {
         char clientOption = ' ';
 
-        while (true){
+        while (true) {
             System.out.println("Digite uma opção válida, por favor: ");
             try {
                 clientOption = new Scanner(System.in).next().charAt(0);
