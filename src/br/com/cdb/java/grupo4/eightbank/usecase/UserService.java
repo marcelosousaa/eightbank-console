@@ -1,10 +1,10 @@
 package br.com.cdb.java.grupo4.eightbank.usecase;
 
-import br.com.cdb.java.grupo4.eightbank.dao.AccountDAO;
 import br.com.cdb.java.grupo4.eightbank.dao.UserDAO;
 import br.com.cdb.java.grupo4.eightbank.enuns.AccountType;
 import br.com.cdb.java.grupo4.eightbank.enuns.ClientCategory;
 import br.com.cdb.java.grupo4.eightbank.enuns.SystemMessages;
+import br.com.cdb.java.grupo4.eightbank.exceptions.InvalidValueException;
 import br.com.cdb.java.grupo4.eightbank.model.account.Account;
 import br.com.cdb.java.grupo4.eightbank.model.user.User;
 import br.com.cdb.java.grupo4.eightbank.model.user.admin.Administrator;
@@ -21,139 +21,109 @@ import java.util.List;
 import java.util.Scanner;
 
 public class UserService {
-    User user = null;
     UserDAO userDAO = new UserDAO();
-    String email = null;
-    String passwordString = null;
     AccountService accountService = new AccountService();
-    String cpf;
-    String name;
-    LocalDate localDate;
-    String streetName;
-    long number;
-    String district;
-    String city;
-    String state;
-    String zipCode;
-    AccountType accountType;
-    double grossMonthlyIncome;
-    String phoneNumber;
-
     ClientCategory clientCategory;
-    List<Account> clientAccountsList;
 
-    public boolean adminRegistration() throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public void adminRegistration() throws NoSuchAlgorithmException, InvalidKeySpecException {
         String passwordString = "senha";
         String strongPassword = PasswordService.generateStrongPassword(passwordString);
 
         Administrator administrator = new Administrator("admin@teste.com", strongPassword, "Administrador");
 
         userDAO.addUser(administrator);
+    }
+
+    public boolean clientRegistration()
+            throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidValueException {
+
+        String cpf = inputCPF();
+        double grossMonthlyIncome = inputGrossMonthlyIncome();
+        String email = inputEmail();
+        String name = inputName();
+        LocalDate localDate = inputDateOfBirth();
+        Address address = inputAddress();
+        String phoneNumber = inputPhoneNumber();
+        String passwordString = inputPassword();
+
+        Client client = new Client(
+                grossMonthlyIncome,
+                email,
+                passwordString,
+                name,
+                clientCategory,
+                cpf,
+                localDate,
+                address,
+                phoneNumber
+        );
+
+        //Adiciona usuario ao "banco de dados" de clientes
+        userDAO.addUser(client);
+
+        // Cria a(s) conta(s) do cliente e devolve para um ArrayList
+        List<Account> clientAccountsList = clientAccountsRegistration(client);
+
+        //Itera no array retornado e seta o Cliente como owner das contas
+        for(Account account : clientAccountsList){
+            accountService.setAccountOwner(account, client);
+        }
+
+        // Lista os usuários cadastrados, à partir do método toString
+        userDAO.listUsers();
+
+        //Listar contas e titulares
+        accountService.listAccounts();
 
         return true;
     }
 
-    public boolean clientRegistration() throws NoSuchAlgorithmException, InvalidKeySpecException {
-
-        Client client;
-        LocalDate localDate;
+    private String inputPassword() throws NoSuchAlgorithmException, InvalidKeySpecException {
+        String passwordString;
 
         while (true) {
-            System.out.println("Digite o numero do seu CPF, sem pontos ou traços: ");
-            try {
-                cpf = new Scanner(System.in).nextLine();
-                if (!CPFValidator.validateCPF(cpf)) {
-                    System.out.println("CPF inválido!");
-                } else if(userDAO.searchClientByCPF(cpf)){
-                    System.err.println("Usuário já existente na base de dados!");
-                } else {
-                    break;
-                }
-            } catch (InputMismatchException e) {
-                System.out.println("Caracter(es) inválido(s)!");
-            }
-        }
-
-        while (true) {
-            System.out.println("Informe sua renda mensal bruta: ");
-            try {
-                grossMonthlyIncome = new Scanner(System.in).nextDouble();
-                clientCategory = checkClientCategory(grossMonthlyIncome);
-                break;
-            } catch (InputMismatchException e) {
-                System.out.println("Formato inválido!");
-            }
-        }
-
-        while (true) {
-            System.out.println("Certo, vamos começar o cadastro pelo seu email\n"
-                    + "Digita ele pra gente aqui em baixo: ");
-            email = new Scanner(System.in).nextLine();
-            if (email.isEmpty()) {
+            System.out.println("Certo, para finalizar vamos definir uma senha de acesso: ");
+            passwordString = new Scanner(System.in).nextLine();
+            if (passwordString.isEmpty()) {
                 System.out.println(SystemMessages.MANDATORY_FIELD_PT_BR.getFieldName());
             } else {
-                if (!EmailValidator.validateEmail(email)) {
-                    System.err.println("Parece que seu e-mail está em um formato inválido...");
-                } else {
-                    break;
-                }
+                passwordString = PasswordService.generateStrongPassword(passwordString);
+                break;
             }
         }
 
-        while (true) {
-            System.out.println("Digite seu nome: ");
-            name = new Scanner(System.in).nextLine();
-            if (name.isEmpty()) {
-                System.out.println(SystemMessages.MANDATORY_FIELD_PT_BR.getFieldName());
+        return passwordString;
+    }
+
+    private String inputPhoneNumber() {
+        String phoneNumber;
+
+        while(true){
+            System.out.println("Informa um telefone pra contato, no formato (XX) XXXX(X)-XXXX, por favor:  ");
+            phoneNumber = new Scanner(System.in).nextLine();
+            if(!PhoneNumberValidator.validatePhoneNumber(phoneNumber)){
+                System.out.println(SystemMessages.INVALID_FORMAT.getFieldName());
             } else {
                 break;
             }
         }
 
-        while (true) {
-            System.out.println("Digite sua data de nascimento, no formato(dd/mm/aaaa):");
-            String dob = new Scanner(System.in).nextLine();
-            if (!DateOfBirthValidator.validateDateOfBirth(dob)) {
-                System.out.println("Formato inválido!");
-            } else {
-                String[] fields = dob.split("/");
-                int day = Integer.parseInt(fields[0]);
-                int month = Integer.parseInt(fields[1]);
-                int year = Integer.parseInt(fields[2]);
+        return phoneNumber;
+    }
 
-                if (year > LocalDate.now().getYear()) {
-                    System.out.println("Ano inválido!");
-                } else if (year == LocalDate.now().getYear() - 18) {
-                    if (month <= LocalDate.now().getMonthValue()) {
-                        if (day <= LocalDate.now().getDayOfMonth()) {
-                            try {
-                                localDate = LocalDate.of(year, month, day);
-                                break;
-                            } catch (Exception e) {
-                                System.out.println("Data inválida!");
-                                //System.out.println(e.getMessage());
-                            }
-                        } else {
-                            System.out.println("Cadastro permitido somente para maiores de 18 anos.");
-                        }
-                    } else {
-                        System.out.println("Cadastro permitido somente para maiores de 18 anos.");
-                    }
-                } else {
-                    try {
-                        localDate = LocalDate.of(year, month, day);
-                        break;
-                    } catch (Exception e) {
-                        System.out.println("Data inválida!");
-                        //System.out.println(e.getMessage());
-                    }
-                }
-            }
-        }
+    private Address inputAddress() {
+        System.out.println("Certo! Agora vamos cadastrar seu endereço.");
+
+        Address address;
+        String streetName;
+        long number;
+        String district;
+        String city;
+        String state;
+        String zipCode;
 
         while (true) {
-            System.out.println("Certo! Agora vamos cadastrar seu endereço.\n"
-                    + "Por favor digite o nome da rua: ");
+            System.out.println("Por favor digite o nome da rua: ");
             streetName = new Scanner(System.in).nextLine();
             if (streetName.isEmpty()) {
                 System.out.println(SystemMessages.MANDATORY_FIELD_PT_BR.getFieldName());
@@ -161,6 +131,7 @@ public class UserService {
                 break;
             }
         }
+
         while (true) {
             System.out.println("Digite o número do endereço: ");
             try {
@@ -207,65 +178,138 @@ public class UserService {
             if (!ZipCodeValidator.validateZipCode(zipCodeString)) {
                 System.out.println(SystemMessages.INVALID_ZIP_CODE.getFieldName());
             } else {
-                String cleanZipCode = zipCodeString.replace("-", "");
-                zipCode = cleanZipCode;
+                zipCodeString = zipCodeString.replace("-", "");
+                zipCode = zipCodeString;
                 break;
             }
         }
 
-        while(true){
-            System.out.println("Informa um telefone pra contato: ");
-            phoneNumber = new Scanner(System.in).nextLine();
-            if(!PhoneNumberValidator.validatePhoneNumber(phoneNumber)){
-                System.out.println(SystemMessages.INVALID_FORMAT.getFieldName());
-            } else {
-                break;
-            }
-        }
+        return new Address(streetName, number, district, city, state, zipCode);
+    }
+
+    private LocalDate inputDateOfBirth() {
+        LocalDate dateOfBirth;
+        String dob;
 
         while (true) {
-            System.out.println("Certo, para finalizar vamos definir uma senha de acesso: ");
-            passwordString = new Scanner(System.in).nextLine();
-            if (passwordString.isEmpty()) {
+            System.out.println("Digite sua data de nascimento, no formato(dd/mm/aaaa):");
+            dob = new Scanner(System.in).nextLine();
+            if (!DateOfBirthValidator.validateDateOfBirth(dob)) {
+                System.out.println("Formato inválido!");
+            } else {
+                String[] fields = dob.split("/");
+                int day = Integer.parseInt(fields[0]);
+                int month = Integer.parseInt(fields[1]);
+                int year = Integer.parseInt(fields[2]);
+
+                if (year > LocalDate.now().getYear()) {
+                    System.out.println("Ano inválido!");
+                } else if (year == LocalDate.now().getYear() - 18) {
+                    if (month <= LocalDate.now().getMonthValue()) {
+                        if (day <= LocalDate.now().getDayOfMonth()) {
+                            try {
+                                dateOfBirth = LocalDate.of(year, month, day);
+                                break;
+                            } catch (Exception e) {
+                                System.out.println("Data inválida!");
+                                //System.out.println(e.getMessage());
+                            }
+                        } else {
+                            System.out.println("Cadastro permitido somente para maiores de 18 anos.");
+                        }
+                    } else {
+                        System.out.println("Cadastro permitido somente para maiores de 18 anos.");
+                    }
+                } else {
+                    try {
+                        dateOfBirth = LocalDate.of(year, month, day);
+                        break;
+                    } catch (Exception e) {
+                        System.out.println("Data inválida!");
+                        //System.out.println(e.getMessage());
+                    }
+                }
+            }
+        }
+        return dateOfBirth;
+    }
+
+    private String inputName() {
+        String name;
+        while (true) {
+            System.out.println("Digite seu nome: ");
+            name = new Scanner(System.in).nextLine();
+            if (name.isEmpty()) {
                 System.out.println(SystemMessages.MANDATORY_FIELD_PT_BR.getFieldName());
             } else {
-                passwordString = PasswordService.generateStrongPassword(passwordString);
                 break;
             }
         }
+        return name;
+    }
 
-        Address address = new Address(streetName, number, district, city, state, zipCode);
+    private String inputEmail() {
+        String email;
 
-        client = new Client(
-                grossMonthlyIncome,
-                email,
-                passwordString,
-                name,
-                clientCategory,
-                cpf,
-                localDate,
-                address,
-                phoneNumber
-        );
-
-        //Adiciona usuario ao "banco de dados" de clientes
-        userDAO.addUser(client);
-
-        // Cria a(s) conta(s) do cliente e devolve para um ArrayList
-        clientAccountsList = clientAccountsRegistration(client);
-
-        //Itera no array retornado e seta o Cliente como owner das contas
-        for(Account account : clientAccountsList){
-            accountService.setAccountOwner(account, client);
+        while (true) {
+            System.out.println("Certo, vamos começar o cadastro pelo seu email\n"
+                    + "Digita ele pra gente aqui em baixo: ");
+            email = new Scanner(System.in).nextLine();
+            if (email.isEmpty()) {
+                System.out.println(SystemMessages.MANDATORY_FIELD_PT_BR.getFieldName());
+            } else {
+                if (!EmailValidator.validateEmail(email)) {
+                    System.err.println("Parece que seu e-mail está em um formato inválido...");
+                } else {
+                    break;
+                }
+            }
         }
 
-        // Lista os usuários cadastrados, à partir do método toString
-        userDAO.listUsers();
+        return email;
+    }
 
-        //Listar contas e titulares
-        accountService.listAccounts();
+    private double inputGrossMonthlyIncome() throws InvalidValueException {
+        double grossMonthlyIncome;
 
-        return true;
+        while (true) {
+            System.out.println("Informe sua renda mensal bruta: ");
+            try {
+                grossMonthlyIncome = new Scanner(System.in).nextDouble();
+                if(grossMonthlyIncome <= 0){
+                    throw new InvalidValueException("Valor inválido!");
+                } else {
+                    clientCategory = checkClientCategory(grossMonthlyIncome);
+                    break;
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Formato inválido!");
+            }
+        }
+
+        return grossMonthlyIncome;
+    }
+
+    private String inputCPF() {
+        String cpf;
+
+        while (true) {
+            System.out.println("Digite o numero do seu CPF, sem pontos ou traços: ");
+            try {
+                cpf = new Scanner(System.in).nextLine();
+                if (!CPFValidator.validateCPF(cpf)) {
+                    System.out.println("CPF inválido!");
+                } else if(userDAO.searchClientByCPF(cpf)){
+                    System.err.println("Usuário já existente na base de dados!");
+                } else {
+                    break;
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Caracter(es) inválido(s)!");
+            }
+        }
+
+        return cpf;
     }
 
     private List<Account> clientAccountsRegistration(Client client){
@@ -346,8 +390,11 @@ public class UserService {
         return clientCategory;
     }
 
-
     public User login() {
+        User user = null;
+        String email;
+        String passwordString;
+
         while (user == null) {
             while (true) {
                 System.out.println("Digite seu email: ");
@@ -373,7 +420,7 @@ public class UserService {
 
             try {
                 user = userDAO.searchUserByEmail(email);
-                System.out.println(user);
+                //System.out.println(user);
                 try {
                     PasswordService.validatePassword(passwordString, user.getPassword());
                 } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {

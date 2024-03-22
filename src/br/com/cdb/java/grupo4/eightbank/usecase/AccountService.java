@@ -2,6 +2,7 @@ package br.com.cdb.java.grupo4.eightbank.usecase;
 
 import br.com.cdb.java.grupo4.eightbank.dao.AccountDAO;
 import br.com.cdb.java.grupo4.eightbank.enuns.AccountType;
+import br.com.cdb.java.grupo4.eightbank.exceptions.AccountNotFoundException;
 import br.com.cdb.java.grupo4.eightbank.exceptions.InsufficientFundsException;
 import br.com.cdb.java.grupo4.eightbank.exceptions.InvalidValueException;
 import br.com.cdb.java.grupo4.eightbank.model.account.Account;
@@ -9,73 +10,81 @@ import br.com.cdb.java.grupo4.eightbank.model.account.CurrentAccount;
 import br.com.cdb.java.grupo4.eightbank.model.account.SavingsAccount;
 import br.com.cdb.java.grupo4.eightbank.model.user.client.Client;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AccountService {
     AccountDAO accountDAO = new AccountDAO();
 
     public Account createCurrentAccount(Client client, double accountFee) {
         double balance = 0;
-        Account currentAccount = new CurrentAccount(balance,client, accountFee);
+        Account currentAccount = new CurrentAccount(balance, client, accountFee);
         accountDAO.addAccount(currentAccount);
         return currentAccount;
     }
 
-    public Account createSavingsAccount(Client client, double annualPercentageYield){
+    public Account createSavingsAccount(Client client, double annualPercentageYield) {
         double balance = 0;
         Account savingsAccount = new SavingsAccount(balance, client, annualPercentageYield);
         accountDAO.addAccount(savingsAccount);
         return savingsAccount;
     }
 
-    public void setAccountOwner(Account account, Client client){
-        accountDAO.searchAccountByNumber(account.getAccountNumber());
+    public void setAccountOwner(Account account, Client client) {
+        accountDAO.setAccountOwner(account, client);
     }
 
-    public void checkBalance(Account account){
-        System.out.println(account.getBalance());
-    }
-    public void withdraw(Account account, double value) throws InsufficientFundsException, InvalidValueException {
-        if (value >= 0) {
-            if (account.getBalance() >= value) {
-                account.setBalance(account.getBalance() - value);
-            } else {
-                throw new InsufficientFundsException("Saldo Insuficiente!");
-            }
-        } else {
-            throw new InvalidValueException("Valor inválido!");
+    public void checkBalance(long accountNumber)   {
+        try{
+            accountDAO.checkBalance(accountNumber);
+        } catch (AccountNotFoundException e){
+            System.out.println(e.getMessage());
         }
     }
 
-    public void deposit(Account account, double value) throws InvalidValueException {
-        if (value > 0) {
-            account.setBalance(account.getBalance() + value);
-            System.out.println("Saldo atual - R$ " + account.getBalance());
-        } else {
-            throw new InvalidValueException("Valor inválido!");
-        }
+    public void withdraw(long accountNumber, double value) throws InsufficientFundsException, InvalidValueException, AccountNotFoundException {
+        accountDAO.withdrawValue(accountNumber, value);
+        checkBalance(accountNumber);
     }
 
-    public void transfer(Account originAccount, Account targetAccount, double value){
+    public void deposit(long accountNumber, double value)  {
+        try{
+            accountDAO.depositValue(accountNumber, value);
+        } catch (AccountNotFoundException | InvalidValueException e){
+            System.out.println(e.getMessage());
+        }
+
+
+    }
+
+    public void transfer(long originAccountNumber, long targetAccountNumber, double value) {
         try {
-            withdraw(originAccount, value);
-            try{
-                deposit(targetAccount, value);
-            } catch (InvalidValueException e){
-                e.getMessage();
+            accountDAO.withdrawValue(originAccountNumber, value);
+            try {
+                accountDAO.depositValue(targetAccountNumber, value);
+            } catch (InvalidValueException e) {
+                System.out.println(e.getMessage());
             }
-        } catch (InsufficientFundsException | InvalidValueException e) {
-            e.getMessage();
+        } catch (InsufficientFundsException | InvalidValueException | AccountNotFoundException e) {
+            System.out.println(e.getMessage());
         }
     }
 
-    public void transferPix(Account originAccount, String pixKey, double value){
+    public void transferPix(long accountNumber, String pixKey, double value) {
         try {
-            withdraw(originAccount, value);
-        } catch (InsufficientFundsException | InvalidValueException e) {
-            e.getMessage();
+            accountDAO.withdrawValue(accountNumber, value);
+        } catch (InsufficientFundsException | InvalidValueException | AccountNotFoundException e) {
+            System.out.println(e.getMessage());
         }
     }
 
     public void listAccounts() {
         accountDAO.listAccounts();
+    }
+
+    public List<Account> findAccountsByCPF(String cpf) {
+        List<Account> accountList = new ArrayList<>();
+        accountList.add(accountDAO.searchAccountByCpf(cpf));
+        return accountList;
     }
 }

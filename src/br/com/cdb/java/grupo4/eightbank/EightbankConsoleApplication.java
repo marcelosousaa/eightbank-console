@@ -1,7 +1,10 @@
 package br.com.cdb.java.grupo4.eightbank;
 
 import br.com.cdb.java.grupo4.eightbank.enuns.UserRole;
+import br.com.cdb.java.grupo4.eightbank.exceptions.InvalidValueException;
 import br.com.cdb.java.grupo4.eightbank.model.user.User;
+import br.com.cdb.java.grupo4.eightbank.model.user.client.Client;
+import br.com.cdb.java.grupo4.eightbank.usecase.ClientService;
 import br.com.cdb.java.grupo4.eightbank.usecase.UserService;
 
 import java.security.NoSuchAlgorithmException;
@@ -10,13 +13,16 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class EightbankConsoleApplication {
-    public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public static void main(String[] args)
+            throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidValueException {
 
-        UserService userService = new UserService();
         User user;
 
+        UserService userService = new UserService();
         // CADASTRA ADMINISTRADOR PADRAO (admin@teste.com, senha123)
         userService.adminRegistration();
+
+        ClientService clientService = new ClientService();
 
         while (true) {
             int menuOption = 0;
@@ -54,8 +60,8 @@ public class EightbankConsoleApplication {
                             user = userService.login();
                             if (user.getUserRole().equals(UserRole.ADMINISTRATOR)) {
                                 // Acessos admin
-                            } else {
-                                // Acesos cliente
+                            } else if(user instanceof Client){
+                                clientService.clientMenu((Client) user);
                             }
                             break;
                         case 0:
@@ -67,7 +73,6 @@ public class EightbankConsoleApplication {
             } catch (InputMismatchException e) {
                 System.out.println("Caracter inválido!"
                         + " Retornando ao menu... \n");
-                new Scanner(System.in).next();
             }
         }
     }
