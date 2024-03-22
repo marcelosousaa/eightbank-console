@@ -57,14 +57,4 @@ public class UserDAO {
         }
         return false;
     }
-
-    public void addAccounts(Client client, List<Account> clientAccountsList) {
-        for(User u : userList){
-            if(u instanceof Client){
-                if(((Client) u).getCpf().equals(client.getCpf())){
-                    ((Client) u).setAccountList(clientAccountsList);
-                }
-            }
-        }
-    }
 }

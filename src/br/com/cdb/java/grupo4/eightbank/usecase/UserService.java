@@ -254,15 +254,12 @@ public class UserService {
         // Cria a(s) conta(s) do cliente e devolve para um ArrayList
         clientAccountsList = clientAccountsRegistration(client);
 
-        //Adiciona as contas geradas à conta do cliente
-        userDAO.addAccounts(client, clientAccountsList);
-
         //Itera no array retornado e seta o Cliente como owner das contas
         for(Account account : clientAccountsList){
             accountService.setAccountOwner(account, client);
         }
 
-        // Lista os usuários cadastras, à partir do método toString
+        // Lista os usuários cadastrados, à partir do método toString
         userDAO.listUsers();
 
         //Listar contas e titulares
@@ -284,7 +281,7 @@ public class UserService {
                 System.out.println(iterator + " - " + type.getAccountTypeName());
                 iterator++;
             }
-            System.out.println((iterator++) + "Ambas");
+            System.out.println((iterator++) + " - Ambas");
             try{
                 int accountTypeOption = new Scanner(System.in).nextInt();
                 if(accountTypeOption < 1 || accountTypeOption > 3){

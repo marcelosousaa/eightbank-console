@@ -13,7 +13,6 @@ public class Client extends User {
     private LocalDate dateOfBirth;
     private Address address;
     private ClientCategory clientCategory;
-    private List<Account> accountList;
     private String phoneNumber;
     private double grossMonthlyIncome;
 
@@ -76,14 +75,6 @@ public class Client extends User {
         this.cpf = cpf;
     }
 
-    public List<Account> getAccountList() {
-        return accountList;
-    }
-
-    public void setAccountList(List<Account> accountList) {
-        this.accountList = accountList;
-    }
-
     public double getGrossMonthlyIncome() {
         return grossMonthlyIncome;
     }
@@ -99,7 +90,6 @@ public class Client extends User {
                 ", dateOfBirth=" + dateOfBirth +
                 ", address=" + address +
                 ", clientCategory=" + clientCategory +
-                ", accountList=" + accountList +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", grossMonthlyIncome=" + grossMonthlyIncome +
                 "} " + super.toString();
