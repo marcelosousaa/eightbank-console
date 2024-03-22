@@ -6,7 +6,7 @@ import br.com.cdb.java.grupo4.eightbank.model.user.client.Client;
 public class Account {
     private long branch;
     private long accountNumber;
-    private double balance;
+    double balance;
     private AccountType accountType;
     private Client owner;
 
@@ -14,6 +14,9 @@ public class Account {
         this.branch = 1;
         this.balance = 0;
         this.accountType = accountType;
+    }
+
+    public Account(String accountNumber, AccountType accountType, Client owner, double balance) {
     }
 
     public long getBranch() {

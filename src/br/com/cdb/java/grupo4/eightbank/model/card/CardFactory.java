@@ -1,5 +1,7 @@
 package br.com.cdb.java.grupo4.eightbank.model.card;
 
+import br.com.cdb.java.grupo4.eightbank.enuns.CardType;
+
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Random;
@@ -40,9 +42,5 @@ public class CardFactory {
         }
         return cardNumber.toString();
     }
-}
 
-public enum CardType {
-    CREDIT,
-    DEBIT
 }

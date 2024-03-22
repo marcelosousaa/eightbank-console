@@ -31,7 +31,8 @@ public class UserService {
     AccountService accountService = new AccountService();
     AccountDAO accountDAO = new AccountDAO();
     CardService cardService = new CardService();
-
+    InsuranceService insuranceService = new InsuranceService();
+    ClientService clientService = new ClientService();
 
     String cpf;
     String name;
@@ -42,7 +43,7 @@ public class UserService {
     private String city;
     private String state;
     private String zipCode;
-    private AccountType accountType;
+
     public boolean adminRegistration() throws NoSuchAlgorithmException, InvalidKeySpecException {
         String passwordString = "senha";
         String strongPassword = PasswordService.generateStrongPassword(passwordString);
@@ -60,8 +61,19 @@ public class UserService {
         LocalDate localDate;
 
         while (true) {
-            System.out.println("Certo, vamos começar o cadastro pelo seu email\n"
+            System.out.println("Certo, vamos começar o cadastro pelo seu nome\n"
                     + "Digita ele pra gente aqui em baixo: ");
+            name = scanner.nextLine();
+            if (name.isEmpty()) {
+                System.out.println(SystemMessages.MANDATORY_FIELD_PT_BR.getFieldName());
+                scanner.nextLine(); //Limpar scanner
+            } else {
+                break;
+            }
+        }
+
+        while (true) {
+            System.out.println("Digite seu email: ");
             email = scanner.nextLine();
             if (email.isEmpty()) {
                 System.out.println(SystemMessages.MANDATORY_FIELD_PT_BR.getFieldName());
@@ -75,7 +87,7 @@ public class UserService {
         }
 
         while (true) {
-            System.out.println("Digite o numero do seu CPF, sem pontos ou traços: ");
+            System.out.println("Digite o numero do seu CPF: ");
             try {
                 cpf = scanner.nextLine();
                 if (!CPFValidator.validateCPF(cpf)) {
@@ -92,18 +104,7 @@ public class UserService {
         }
 
         while (true) {
-            System.out.println("Digite seu nome: ");
-            name = scanner.nextLine();
-            if (name.isEmpty()) {
-                System.out.println(SystemMessages.MANDATORY_FIELD_PT_BR.getFieldName());
-                scanner.nextLine(); //Limpar scanner
-            } else {
-                break;
-            }
-        }
-
-        while (true) {
-            System.out.println("Digite sua data de nascimento, no formato(dd/mm/aaaa):");
+            System.out.println("Digite sua data de nascimento, no formato(DD/MM/AAAA):");
             String dob = scanner.nextLine();
             if (!DateOfBirthValidator.validateDateOfBirth(dob)) {
                 System.out.println("Formato inválido!");
@@ -145,7 +146,7 @@ public class UserService {
         }
 
         while (true) {
-            System.out.println("Certo! Agora vamos cadastrar seu endereço.\n"
+            System.out.println("\nCerto! Agora vamos cadastrar seu endereço.\n"
                     + "Por favor digite o nome da rua: ");
             streetName = scanner.nextLine();
             if (streetName.isEmpty()) {
@@ -223,11 +224,13 @@ public class UserService {
                 passwordString = PasswordService.generateStrongPassword(passwordString);
                 break;
             }
+
+            //while(true)
         }
         //scanner.close();
 
         Address address = new Address(streetName, number, district, city, state, zipCode);
-        accountType = AccountType.CURRENT_ACCOUNT;
+        AccountType accountType = AccountType.CURRENT_ACCOUNT;
 
         Account account = accountService.createAccount(accountType);
 
@@ -303,12 +306,12 @@ public class UserService {
         System.out.println("\nBem-vindo ao Menu, " + user.getName());
         while (true) {
             System.out.println("\nEscolha uma opção:");
-            System.out.println("1. Pedir cartão;");
-            System.out.println("2. Informações da conta;");
-            System.out.println("3. Operações do cartão;");
-            System.out.println("4. Ativação/Desativação de seguros;");
-            System.out.println("5. Editar perfil;");
-            System.out.println("0. Sair.");
+            System.out.println("[1] Pedir cartão");
+            System.out.println("[2] Informações da conta");
+            System.out.println("[3] Operações do cartão");
+            System.out.println("[4] Ativação/Desativação de seguros");
+            System.out.println("[5] Editar perfil");
+            System.out.println("[0] Sair");
             System.out.print("Sua escolha: ");
 
             int choice = scanner.nextInt();
@@ -319,17 +322,16 @@ public class UserService {
                     cardService.requestCard();
                     break;
                 case 2:
-
-
+                    accountService.information();
                     break;
                 case 3:
-
+                    cardService.operation();
                     break;
                 case 4:
-
+                    insuranceService.insurance();
                     break;
                 case 5:
-
+                    accountService.editAccount();
                     break;
                 case 0:
                     System.out.println("Encerrando...\n"
@@ -342,4 +344,6 @@ public class UserService {
             }
         }
     }
+
+
 }

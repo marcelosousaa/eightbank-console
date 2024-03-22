@@ -1,12 +1,18 @@
 package br.com.cdb.java.grupo4.eightbank.model.card;
 
 import java.time.LocalDate;
+import br.com.cdb.java.grupo4.eightbank.model.user.User;
+import br.com.cdb.java.grupo4.eightbank.enuns.CardStatus;
+
+import static br.com.cdb.java.grupo4.eightbank.enuns.CardStatus.ACTIVE;
 
 public abstract class Card {
     protected String number;
+    protected String ownerName;
+    protected User user;
     protected LocalDate expirationDate;
     protected int cvv;
-    protected String ownerName;
+    protected CardStatus status;
     protected boolean isActive;
 
     // Construtor
@@ -14,8 +20,7 @@ public abstract class Card {
         this.number = number;
         this.expirationDate = expirationDate;
         this.cvv = cvv;
-        this.ownerName = ownerName;
-        this.isActive = true; // Cartões são ativados por padrão ao serem criados
+        this.status = ACTIVE; // Cartões são ativados por padrão ao serem criados
     }
 
     // Método para verificar a validade do cartão
