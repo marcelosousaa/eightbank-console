@@ -11,6 +11,9 @@ import br.com.cdb.java.grupo4.eightbank.model.client.Address;
 import br.com.cdb.java.grupo4.eightbank.model.client.Client;
 import br.com.cdb.java.grupo4.eightbank.utils.*;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDate;
@@ -26,6 +29,7 @@ public class ClientService {
     ClientDAO clientDAO = new ClientDAO();
     AccountService accountService = new AccountService();
     ClientCategory clientCategory;
+    Client client;
 
     public boolean clientRegistration()
             throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidValueException {
@@ -39,7 +43,7 @@ public class ClientService {
         String phoneNumber = inputPhoneNumber();
         String passwordString = inputPassword();
 
-        Client client = new Client(
+        client = new Client(
                 email,
                 passwordString,
                 name,
@@ -54,13 +58,7 @@ public class ClientService {
         //Adiciona usuario ao "banco de dados" de clientes
         clientDAO.addClient(client);
 
-        // Cria a(s) conta(s) do cliente e devolve para um ArrayList
-        List<Account> clientAccountsList = clientAccountsRegistration(client);
-
-        //Itera no array retornado e seta o Cliente como owner das contas
-        for (Account account : clientAccountsList) {
-            accountService.setAccountOwner(account, client);
-        }
+        registerClientAccounts(client);
 
         // Lista os usuários cadastrados, à partir do método toString
         clientDAO.listClients();
@@ -69,6 +67,26 @@ public class ClientService {
         accountService.listAccounts();
 
         return true;
+    }
+
+    private void registerClientAccounts(Client client) {
+        // Cria a(s) conta(s) do cliente e devolve para um ArrayList
+        List<Account> clientAccountsList = clientAccountsRegistration(client);
+
+        //Itera no array retornado e seta o Cliente como owner das contas
+        for (Account account : clientAccountsList) {
+            accountService.setAccountOwner(account, client.getCpf());
+        }
+    }
+
+    private void registerClientAccounts(Client client, int accountsTypeOtion) {
+        // Cria a(s) conta(s) do cliente e devolve para um ArrayList
+        List<Account> clientAccountsList = clientAccountsRegistration(client, accountsTypeOtion);
+
+        //Itera no array retornado e seta o Cliente como owner das contas
+        for (Account account : clientAccountsList) {
+            accountService.setAccountOwner(account, client.getCpf());
+        }
     }
 
     private String inputPassword() throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -324,15 +342,45 @@ public class ClientService {
                 if (accountTypeOption < 1 || accountTypeOption > 3) {
                     System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
                 } else if (accountTypeOption == 1) {
-                    account = accountService.createSavingsAccount(client, annualPercentageYield);
+                    account = accountService.createSavingsAccount(client.getCpf(), annualPercentageYield);
                     accountList.add(account);
                 } else if (accountTypeOption == 2) {
-                    account = accountService.createCurrentAccount(client, currentAccountMonthlyFee);
+                    account = accountService.createCurrentAccount(client.getCpf(), currentAccountMonthlyFee);
                     accountList.add(account);
                 } else {
-                    account = accountService.createSavingsAccount(client, annualPercentageYield);
+                    account = accountService.createSavingsAccount(client.getCpf(), annualPercentageYield);
                     accountList.add(account);
-                    account = accountService.createCurrentAccount(client, currentAccountMonthlyFee);
+                    account = accountService.createCurrentAccount(client.getCpf(), currentAccountMonthlyFee);
+                    accountList.add(account);
+                }
+                break;
+            } catch (InputMismatchException e) {
+                System.out.println(SystemMessages.INVALID_CARACTER.getFieldName());
+            }
+        }
+        return accountList;
+    }
+
+    private List<Account> clientAccountsRegistration(Client client, int accountsType) {
+        Account account;
+        List<Account> accountList = new ArrayList<>();
+        double annualPercentageYield = checkAnnualPercentageYield(client);
+        double currentAccountMonthlyFee = checkCurrentAccountMonthlyFee(client);
+
+        while (true) {
+            try {
+                if (accountsType < 1 || accountsType > 3) {
+                    System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
+                } else if (accountsType == 1) {
+                    account = accountService.createSavingsAccount(client.getCpf(), annualPercentageYield);
+                    accountList.add(account);
+                } else if (accountsType == 2) {
+                    account = accountService.createCurrentAccount(client.getCpf(), currentAccountMonthlyFee);
+                    accountList.add(account);
+                } else {
+                    account = accountService.createSavingsAccount(client.getCpf(), annualPercentageYield);
+                    accountList.add(account);
+                    account = accountService.createCurrentAccount(client.getCpf(), currentAccountMonthlyFee);
                     accountList.add(account);
                 }
                 break;
@@ -437,20 +485,25 @@ public class ClientService {
         boolean runningClientMenu = false;
 
         while (!runningClientMenu) {
-            System.out.println("Selecione uma opcao abaixo: "
-                    + "\n 1 - Saldo"
-                    + "\n 2 - Depósito"
-                    + "\n 3 - Saque"
-                    + "\n 4 - Transferencias"
-                    + "\n 5 - Cartões"
-                    + "\n 6 - Meu cadastro"
-                    + "\n 0 - Sair"
+            System.out.println(
+                    "Selecione uma opcao abaixo: "
+                            + "\n 1 - Saldo"
+                            + "\n 2 - Depósito"
+                            + "\n 3 - Saque"
+                            + "\n 4 - Transferencias"
+                            + "\n 5 - Cartões" // SUB-MENU SEGUROS
+                            + "\n 6 - Meu cadastro"
+                            + "\n 0 - Sair"
             );
 
             int clientMenuOption = 0;
 
             try {
                 clientMenuOption = new Scanner(System.in).nextInt();
+
+                if (clientMenuOption < 0 || clientMenuOption > 6) {
+                    System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
+                }
 
                 switch (clientMenuOption) {
                     case 1:
@@ -467,6 +520,9 @@ public class ClientService {
                             System.out.println(e.getMessage());
                         }
                         break;
+                    case 5:
+                        cardService.showCardMenu(client);
+                        break;
                     case 0:
                         runningClientMenu = true;
                     default:
@@ -482,12 +538,13 @@ public class ClientService {
         clientAccountsList = accountService.findAccountsByCPF(client.getCpf());
 
         if (clientAccountsList.size() > 1) {
-            System.out.println("\nVimos aqui que você possui mais de uma conta conosco."
+            System.out.println("\nVimos aqui que você possui mais de uma conta conosco.\n"
                     + "Por favor digite o numero da conta que deseja obter o saldo");
 
             System.out.println("Contas encontradas: ");
             for (Account account : clientAccountsList) {
-                System.out.println(" - " + account.getAccountNumber());
+                System.out.println(" - " + account.getAccountNumber()
+                        + " - " + account.getAccountType().getAccountTypeName());
             }
 
             try {
@@ -498,10 +555,10 @@ public class ClientService {
                         try {
                             double value = new Scanner(System.in).nextDouble();
                             accountService.deposit(accountNumber, value);
+                            break;
                         } catch (InputMismatchException e) {
                             System.err.println(SystemMessages.INVALID_CARACTER.getFieldName());
                         }
-                        break;
                     } else {
                         throw new AccountNotFoundException("Esta conta não está na lista.");
                     }
@@ -539,7 +596,8 @@ public class ClientService {
 
                 System.out.println("Contas encontradas: ");
                 for (Account account : clientAccountsList) {
-                    System.out.println(" - " + account.getAccountNumber());
+                    System.out.println(" - " + account.getAccountNumber()
+                            + " - " + account.getAccountType().getAccountTypeName());
                 }
 
                 try {
@@ -608,5 +666,82 @@ public class ClientService {
         }
 
         return clientOption;
+    }
+
+    public void importClientsFromFile(String fileName) {
+        while (true) {
+            //System.out.println("Digite o nome do arquivo:");
+            //String fileName = new Scanner(System.in).nextLine();
+            if (!fileName.isEmpty()) {
+                if (!FileNameValidator.validateFileName(fileName)) {
+                    System.err.println("Formato invalido!");
+                } else {
+                    BufferedReader reader = null;
+                    try {
+                        reader = new BufferedReader(new FileReader(fileName));
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            String[] fields = line.split(",");
+                            String cpf = fields[0];
+                            double grossMonthlyIncome = Double.parseDouble(fields[1]);
+                            String email = fields[2];
+                            String name = fields[3];
+
+                            String dateOfBirth = fields[4];
+                            String[] dateOfBirthFields = dateOfBirth.split("/");
+                            int dayOfMonth = Integer.parseInt(dateOfBirthFields[0]);
+                            int month = Integer.parseInt(dateOfBirthFields[1]);
+                            int year = Integer.parseInt(dateOfBirthFields[2]);
+                            LocalDate dateOfBirthConverted = LocalDate.of(year, month, dayOfMonth);
+
+                            Address address = new Address(
+                                    fields[5],
+                                    Long.parseLong(fields[6]),
+                                    fields[7],
+                                    fields[8],
+                                    fields[9],
+                                    fields[10]
+                            );
+
+                            String phoneNumber = fields[11];
+                            String passwordString = fields[12];
+
+                            clientCategory = checkClientCategory(grossMonthlyIncome);
+
+                            client = new Client(
+                                    email,
+                                    passwordString,
+                                    name,
+                                    cpf,
+                                    dateOfBirthConverted,
+                                    address,
+                                    clientCategory,
+                                    phoneNumber,
+                                    grossMonthlyIncome
+                            );
+
+                            clientDAO.addClient(client);
+
+                            registerClientAccounts(client, 3);
+
+                            // Lista os usuários cadastrados, à partir do método toString
+                            System.out.println("Clientes\n");
+                            clientDAO.listClients();
+
+                            //Listar contas e titulares
+                            System.out.println("\n Clientes e contas");
+                            accountService.listAccounts();
+                        }
+                        reader.close();
+                    } catch (IOException e) {
+                        System.err.println("Erro ao carregar o arquivo: " + fileName);
+                    }
+                    System.out.println("Importação concluída com sucesso!");
+                    break;
+                }
+            } else {
+                System.err.println("Digite o nome do arquivo!");
+            }
+        }
     }
 }

@@ -15,22 +15,22 @@ import java.util.List;
 public class AccountService {
     AccountDAO accountDAO = new AccountDAO();
 
-    public Account createCurrentAccount(Client client, double accountFee) {
+    public Account createCurrentAccount(String ownerCpf, double accountFee) {
         double balance = 0;
-        Account currentAccount = new CurrentAccount(balance, client, accountFee);
+        Account currentAccount = new CurrentAccount(balance, ownerCpf, accountFee);
         accountDAO.addAccount(currentAccount);
         return currentAccount;
     }
 
-    public Account createSavingsAccount(Client client, double annualPercentageYield) {
+    public Account createSavingsAccount(String ownerCpf, double annualPercentageYield) {
         double balance = 0;
-        Account savingsAccount = new SavingsAccount(balance, client, annualPercentageYield);
+        Account savingsAccount = new SavingsAccount(balance, ownerCpf, annualPercentageYield);
         accountDAO.addAccount(savingsAccount);
         return savingsAccount;
     }
 
-    public void setAccountOwner(Account account, Client client) {
-        accountDAO.setAccountOwner(account, client);
+    public void setAccountOwner(Account account, String cpf) {
+        accountDAO.setAccountOwner(account, cpf);
     }
 
     public void checkBalance(long accountNumber)   {

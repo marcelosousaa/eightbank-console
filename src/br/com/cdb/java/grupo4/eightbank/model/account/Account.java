@@ -7,12 +7,12 @@ public abstract class Account {
     private long accountNumber;
     private double balance;
     private AccountType accountType;
-    private Client owner;
+    private String ownerCPF;
 
-    public Account(double balance, AccountType accountType, Client owner) {
+    public Account(double balance, AccountType accountType, String ownerCPF) {
         this.balance = balance;
         this.accountType = accountType;
-        this.owner = owner;
+        this.ownerCPF = ownerCPF;
     }
 
     public long getAccountNumber() {
@@ -31,12 +31,12 @@ public abstract class Account {
         this.balance = balance;
     }
 
-    public Client getOwner() {
-        return owner;
+    public String getOwnerCPF(){
+        return this.ownerCPF;
     }
 
-    public void setOwner(Client owner){
-        this.owner = owner;
+    public void setOwnerCPF(String ownerCPF){
+        this.ownerCPF = ownerCPF;
     }
 
     public AccountType getAccountType() {

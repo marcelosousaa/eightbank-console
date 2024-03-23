@@ -16,13 +16,17 @@ public class EightbankConsoleApplication {
         Client client;
         ClientService clientService = new ClientService();
 
+        clientService.importClientsFromFile("clients.csv");
+
         while (true) {
             int menuOption = 0;
-            System.out.println("\n######### Bem-vindo ao EightBank #########");
-            System.out.println("\nSelecione uma opção abaixo:\n "
-                    + "\n1 - Conheça nossos benefícios e cadastre-se!"
-                    + "\n2 - Acesso à conta"
-                    + "\n0 - Sair");
+            System.out.println(
+                    "\n######### Bem-vindo ao EightBank #########\n" +
+                            "\nSelecione uma opção abaixo:\n "
+                            + "\n1 - Cadastre-se"
+                            + "\n2 - Acesso à conta"
+                            + "\n0 - Sair"
+            );
             try {
                 menuOption = new Scanner(System.in).nextInt();
                 if (menuOption < 0 || menuOption > 2) {

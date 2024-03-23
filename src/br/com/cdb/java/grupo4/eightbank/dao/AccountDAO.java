@@ -15,7 +15,7 @@ public class AccountDAO {
     public void listAccounts() {
         for (Account account : accountList) {
             System.out.println(account);
-            System.out.println(account.getOwner());
+            System.out.println(account.getOwnerCPF());
         }
     }
 
@@ -33,10 +33,10 @@ public class AccountDAO {
         return null;
     }
 
-    public boolean setAccountOwner(Account account, Client client) {
+    public boolean setAccountOwner(Account account, String ownerCPF) {
         for (Account a : accountList) {
             if (a.equals(account)) {
-                account.setOwner(client);
+                account.setOwnerCPF(ownerCPF);
                 return true;
             }
         }
@@ -58,7 +58,7 @@ public class AccountDAO {
         List<Account> clientAccounts = new ArrayList<>();
 
         for (Account a : this.accountList) {
-            if (a.getOwner().getCpf().equals(cpf)) {
+            if (a.getOwnerCPF().equals(cpf)) {
                 clientAccounts.add(a);
             }
         }
@@ -129,7 +129,7 @@ public class AccountDAO {
         List<Account> clientAccountsList = new ArrayList<>();
 
         for(Account a: this.accountList){
-            if(a.getOwner().getCpf().equals(cpf)){
+            if(a.getOwnerCPF().equals(cpf)){
                 clientAccountsList.add(a);
             }
         }
