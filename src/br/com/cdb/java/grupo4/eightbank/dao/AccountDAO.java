@@ -24,15 +24,6 @@ public class AccountDAO {
         accountList.add(account);
     }
 
-    public Account searchAccountByNumber(long accountNumber) {
-        for (Account account : accountList) {
-            if (account.getAccountNumber() == accountNumber) {
-                return account;
-            }
-        }
-        return null;
-    }
-
     public boolean setAccountOwner(Account account, String ownerCPF) {
         for (Account a : accountList) {
             if (a.equals(account)) {
@@ -44,14 +35,20 @@ public class AccountDAO {
     }
 
     public Account findAccountByNumber(long accountNumber) throws AccountNotFoundException {
+        Account account = null;
+
         for (Account a : this.accountList) {
             if (a.getAccountNumber() == accountNumber) {
-                return a;
-            } else {
-                throw new AccountNotFoundException("Conta não localizada!");
+                account = a;
+                break;
             }
         }
-        return null;
+
+        if(account == null){
+            throw new AccountNotFoundException("Conta não localizada!");
+        } else{
+            return account;
+        }
     }
 
     public List<Account> findAccountByClientCPF(String cpf) throws AccountNotFoundException {

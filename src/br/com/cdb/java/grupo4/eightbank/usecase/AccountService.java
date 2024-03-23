@@ -84,4 +84,9 @@ public class AccountService {
     public List<Account> findAccountsByCPF(String cpf) throws AccountNotFoundException {
         return accountDAO.searchAccountByCpf(cpf);
     }
+
+    public Account findAccountByNumber(long accountNumber) throws AccountNotFoundException {
+        Account account;
+        return account = accountDAO.findAccountByNumber(accountNumber);
+    }
 }

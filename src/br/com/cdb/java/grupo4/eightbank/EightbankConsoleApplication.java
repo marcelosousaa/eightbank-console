@@ -19,13 +19,17 @@ public class EightbankConsoleApplication {
         clientService.importClientsFromFile("clients.csv");
 
         while (true) {
-            int menuOption = 0;
+            int menuOption;
             System.out.println(
-                    "\n######### Bem-vindo ao EightBank #########\n" +
-                            "\nSelecione uma opção abaixo:\n "
-                            + "\n1 - Cadastre-se"
-                            + "\n2 - Acesso à conta"
-                            + "\n0 - Sair"
+                    """
+
+                            ######### Bem-vindo ao EightBank #########
+
+                            Selecione uma opção abaixo:
+                            \s
+                            1 - Cadastre-se
+                            2 - Acesso à conta
+                            0 - Sair"""
             );
             try {
                 menuOption = new Scanner(System.in).nextInt();
@@ -54,7 +58,9 @@ public class EightbankConsoleApplication {
                             break;
                         case 2:
                             client = clientService.login();
-                            clientService.clientMenu(client);
+                            if(client != null){
+                                clientService.clientMenu(client);
+                            }
                             break;
                         case 0:
                             System.out.println("Encerrando...\n"
