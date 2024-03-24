@@ -7,7 +7,8 @@ public enum SystemMessages {
     INVALID_CHARACTER("Caracter inválido!"),
     INVALID_OPTION("Opção inválida!"),
     INVALID_FORMAT("Formato inválido!"),
-    INVALID_VALUE("Valor inválido!");
+    INVALID_VALUE("Valor inválido!"),
+    PROCESSING_PT_BR("Processando...");
 
 
     private final String fieldName;

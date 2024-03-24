@@ -6,6 +6,7 @@ import br.com.cdb.java.grupo4.eightbank.enuns.AnsiColors;
 import br.com.cdb.java.grupo4.eightbank.enuns.ClientCategory;
 import br.com.cdb.java.grupo4.eightbank.enuns.SystemMessages;
 import br.com.cdb.java.grupo4.eightbank.exceptions.AccountNotFoundException;
+import br.com.cdb.java.grupo4.eightbank.exceptions.InsufficientFundsException;
 import br.com.cdb.java.grupo4.eightbank.exceptions.InvalidValueException;
 import br.com.cdb.java.grupo4.eightbank.model.account.Account;
 import br.com.cdb.java.grupo4.eightbank.model.client.Address;
@@ -538,6 +539,21 @@ public class ClientService {
                             System.out.println(e.getMessage());
                         }
                         break;
+                    case 3:
+                        try {
+                            withdrawFromAccount(client);
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                        }
+                        break;
+                    case 4:
+                        try {
+                            showTransferMenu(client);
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                            e.printStackTrace();
+                        }
+                        break;
                     case 5:
                         cardService.showCardMenu(client);
                         break;
@@ -554,13 +570,380 @@ public class ClientService {
         }
     }
 
+    private void showTransferMenu(Client client) throws AccountNotFoundException, InvalidValueException, InsufficientFundsException {
+        boolean runningTransferMenu = false;
+        int transferMenuOption = 0;
+
+        while (!runningTransferMenu) {
+            System.out.println("Bem vindo ao menu de transferencias."
+                    + "Selecione uma opção no menu abaixo"
+                    + "1 - Transferencia para outro cliente Eightbank"
+                    + "2 - Pix"
+                    + "0 - Voltar");
+
+            try {
+                transferMenuOption = new Scanner(System.in).nextInt();
+
+                if (transferMenuOption < 0 || transferMenuOption > 2) {
+                    System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
+                } else {
+                    switch (transferMenuOption) {
+                        case 1:
+                            transferToSameBank(client);
+                            break;
+                        case 2:
+                            transferPix(client);
+                            break;
+                        case 0:
+                            System.out.println("Voltando...");
+                            runningTransferMenu = true;
+                            break;
+                        default:
+                            System.err.println(SystemMessages.INVALID_OPTION.getFieldName());
+                    }
+                }
+            } catch (InputMismatchException e) {
+                System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
+            }
+        }
+    }
+
+    private void transferPix(Client client)
+            throws AccountNotFoundException, InvalidValueException, InsufficientFundsException {
+        clientAccountsList = accountService.findAccountsByCPF(client.getCpf());
+
+        boolean runningTransferMenu = false;
+        char clientOption = ' ';
+        String pixKey;
+
+        while (!runningTransferMenu) {
+            if (clientAccountsList.size() > 1) {
+                System.out.println("\nVimos aqui que você possui mais de uma conta conosco.\n");
+
+                System.out.println("Número da Conta - Tipo da Conta");
+                for (Account account : clientAccountsList) {
+                    System.out.println(" - " + account.getAccountNumber()
+                            + " - " + account.getAccountType().getAccountTypeName());
+                }
+
+                System.out.println("\nPor favor digite o numero da conta que deseja utlizar: ");
+
+                try {
+                    long senderAccountNumber = new Scanner(System.in).nextLong();
+                    Account senderAccount = null;
+                    for (Account account : clientAccountsList) {
+                        if (account.getAccountNumber() != senderAccountNumber) {
+                            System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
+                        } else {
+                            senderAccount = account;
+
+                            //System.out.println("Digite a chave PIX: ");
+
+                            pixKey = inputPixKey();
+                            try {
+                                pixKey = new Scanner(System.in).nextLine();
+
+                                System.out.println("Digite o valor que deseja transferir: ");
+                                try {
+                                    double value = new Scanner(System.in).nextDouble();
+                                    accountService.withdraw(senderAccount.getAccountNumber(), value);
+                                    System.out.println(
+                                            "Transferencia realizada com sucesso!\n"
+                                                    + "O valor de R$ " + value
+                                                    + "foi transferido para o PIX: " + pixKey
+                                    );
+                                    break;
+                                } catch (InputMismatchException e) {
+                                    System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                                }
+                            } catch (InputMismatchException e) {
+                                System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                            }
+                        }
+                    }
+
+                    if (senderAccount == null) {
+                        throw new AccountNotFoundException(
+                                "\n"
+                                        + AnsiColors.ANSI_RED.getAnsiColorCode()
+                                        + "Conta não está na lista!"
+                                        + AnsiColors.ANSI_RESET.getAnsiColorCode()
+                                        + "\n"
+                        );
+                    }
+
+
+                } catch (InputMismatchException e) {
+                    System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                }
+            } else {
+                System.out.println("Localizamos sua conta. Confira os detalhes abaixo: ");
+                System.out.println(" - " + clientAccountsList.get(0).getAccountNumber());
+
+                while (true){
+                    System.out.println("Digite a chave PIX para qual deseja efetuar a transferencia: ");
+                    pixKey = new Scanner(System.in).nextLine();
+
+                    if(pixKey.isEmpty()){
+                        System.err.println("Valor vazio!");
+                    } else {
+                        break;
+                    }
+                }
+
+                System.out.println("Digite o valor que deseja transferir: ");
+                try {
+                    double value = new Scanner(System.in).nextDouble();
+                    accountService.withdraw(clientAccountsList.get(0).getAccountNumber(), value);
+                    System.out.println(
+                            "Transferencia realizada com sucesso!\n"
+                                    + "O valor de R$ " + value
+                                    + "foi transferido para o PIX: " + pixKey
+                    );
+                    break;
+                } catch (InputMismatchException e) {
+                    System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                }
+            }
+            System.out.println("\nDeseja efetuar outra transferencia PIX?(S/N)");
+            clientOption = validateClientOptionYesOrNo();
+            if (clientOption != 'S') {
+                runningTransferMenu = true;
+            }
+        }
+    }
+
+    private String inputPixKey() {
+        String pixKey = null;
+        boolean inputPixKeyMenu = false;
+        int inputPixKeyMenuOption = 0;
+
+        while (!inputPixKeyMenu){
+            System.out.println("""
+                    Selecione uma opção abaixo:
+                    1 - CPF
+                    2 - CNPJ
+                    3 - E-mail
+                    4 - Celular
+                    5 - Chave Aleatória
+                    0 - Voltar"""
+            );
+
+            inputPixKeyMenuOption = new Scanner(System.in).nextInt();
+            if(inputPixKeyMenuOption < 0 || inputPixKeyMenuOption > 5){
+                System.err.println(SystemMessages.INVALID_OPTION.getFieldName());
+            } else {
+                System.out.println("Digite a chave PIX: ");
+                pixKey = new Scanner(System.in).nextLine();
+                switch (inputPixKeyMenuOption){
+                    case 1:
+                        CPFValidator.validateCPF(pixKey);
+                        break;
+                    case 2:
+                        //CNPJValidator.validateCNPJ(pixKey);
+                        break;
+                    case 3:
+                        EmailValidator.validateEmail(pixKey);
+                        break;
+                    case 4:
+                        PhoneNumberValidator.validatePhoneNumber(pixKey);
+                        break;
+                    case 5:
+                        break;
+                    case 0:
+                        pixKey = null;
+                        inputPixKeyMenu = true;
+                        break;
+                }
+            }
+        }
+        return pixKey;
+    }
+
+    private void transferToSameBank(Client client) throws
+            InvalidValueException, InsufficientFundsException, AccountNotFoundException {
+        clientAccountsList = accountService.findAccountsByCPF(client.getCpf());
+
+        boolean runningTransferMenu = false;
+        char clientOption = ' ';
+
+        while (!runningTransferMenu) {
+            if (clientAccountsList.size() > 1) {
+                System.out.println("\nVimos aqui que você possui mais de uma conta conosco.\n");
+
+                System.out.println("Número da Conta - Tipo da Conta");
+                for (Account account : clientAccountsList) {
+                    System.out.println(" - " + account.getAccountNumber()
+                            + " - " + account.getAccountType().getAccountTypeName());
+                }
+
+                System.out.println("\nPor favor digite o numero da conta que deseja utlizar: ");
+
+                try {
+                    long senderAccountNumber = new Scanner(System.in).nextLong();
+                    Account senderAccount = null;
+                    for (Account account : clientAccountsList) {
+                        if (account.getAccountNumber() != senderAccountNumber) {
+                            System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
+                        } else {
+                            senderAccount = account;
+
+                            System.out.println("Digite o número da conta 'Eightbank' que deseja transferir: ");
+                            try {
+                                long receiverAccountNumber = new Scanner(System.in).nextLong();
+                                Account receiverAccount = accountService.findAccountByNumber(receiverAccountNumber);
+
+                                System.out.println("Digite o valor que deseja transferir: ");
+                                try {
+                                    double value = new Scanner(System.in).nextDouble();
+                                    accountService.withdraw(senderAccount.getAccountNumber(), value);
+                                    accountService.deposit(receiverAccount.getAccountNumber(), value);
+                                    System.out.println(
+                                            "Transferencia realizada com sucesso!\n"
+                                                    + "O valor de R$ " + value
+                                                    + "foi transferido para a conta: " + receiverAccount.getAccountNumber()
+                                    );
+                                    break;
+                                } catch (InputMismatchException e) {
+                                    System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                                }
+                            } catch (InputMismatchException e) {
+                                System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                            }
+                        }
+                    }
+
+                    if (senderAccount == null) {
+                        throw new AccountNotFoundException(
+                                "\n"
+                                        + AnsiColors.ANSI_RED.getAnsiColorCode()
+                                        + "Conta não está na lista!"
+                                        + AnsiColors.ANSI_RESET.getAnsiColorCode()
+                                        + "\n"
+                        );
+                    }
+
+
+                } catch (InputMismatchException e) {
+                    System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                }
+            } else {
+                long clientAccountNumber = clientAccountsList.get(0).getAccountNumber();
+                System.out.println("Localizamos sua conta. Confira os detalhes abaixo: ");
+                System.out.println(" - " + clientAccountNumber);
+
+                System.out.println("Digite o número da conta 'Eightbank' que deseja transferir: ");
+                try {
+                    long receiverAccountNumber = new Scanner(System.in).nextLong();
+
+                    System.out.println("Digite o valor que deseja transferir: ");
+                    try {
+                        double value = new Scanner(System.in).nextDouble();
+                        accountService.withdraw(clientAccountNumber, value);
+                        accountService.deposit(receiverAccountNumber, value);
+                        System.out.println(
+                                "Transferencia realizada com sucesso!\n"
+                                        + "O valor de R$ " + value
+                                        + "foi transferido para a conta: " + receiverAccountNumber
+                        );
+                        break;
+                    } catch (InputMismatchException e) {
+                        System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                    }
+                } catch (InputMismatchException e) {
+                    System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                }
+            }
+
+            System.out.println("\nDeseja efetuar outra transferencia?(S/N)");
+            clientOption = validateClientOptionYesOrNo();
+            if (clientOption != 'S') {
+                runningTransferMenu = true;
+            }
+        }
+    }
+
+    private void withdrawFromAccount(Client client)
+            throws AccountNotFoundException, InvalidValueException, InsufficientFundsException {
+        clientAccountsList = accountService.findAccountsByCPF(client.getCpf());
+
+        boolean runningWithdrawFromAccount = false;
+        char clientOption = ' ';
+
+        while (!runningWithdrawFromAccount) {
+            if (clientAccountsList.size() > 1) {
+                System.out.println("\nVimos aqui que você possui mais de uma conta conosco.\n");
+
+                System.out.println("Número da Conta - Tipo da Conta");
+                for (Account account : clientAccountsList) {
+                    System.out.println(" - " + account.getAccountNumber()
+                            + " - " + account.getAccountType().getAccountTypeName());
+                }
+
+                System.out.println("\nPor favor digite o numero da conta que deseja efetuar o saque: ");
+
+                try {
+                    long accountNumber = new Scanner(System.in).nextLong();
+
+                    Account accountToCheck = null;
+
+                    for (Account account : clientAccountsList) {
+                        if (account.getAccountNumber() != accountNumber) {
+                            System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
+                        } else {
+                            accountToCheck = accountService.findAccountByNumber(accountNumber);
+
+                            System.out.println("Digite o valor que deseja sacar: ");
+                            try {
+                                double value = new Scanner(System.in).nextDouble();
+                                accountService.withdraw(accountToCheck.getAccountNumber(), value);
+                                break;
+                            } catch (InputMismatchException e) {
+                                System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                            }
+                        }
+                    }
+
+                    if (accountToCheck == null) {
+                        throw new AccountNotFoundException(
+                                "\n"
+                                        + AnsiColors.ANSI_RED.getAnsiColorCode()
+                                        + "Conta não está na lista!"
+                                        + AnsiColors.ANSI_RESET.getAnsiColorCode()
+                                        + "\n"
+                        );
+                    }
+                } catch (InputMismatchException e) {
+                    System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                }
+            } else {
+                System.out.println("Localizamos sua conta. Confira os detalhes abaixo: ");
+                System.out.println(" - " + clientAccountsList.get(0).getAccountNumber());
+
+                System.out.println("Digite o valor que deseja sacar: ");
+                try {
+                    double value = new Scanner(System.in).nextDouble();
+                    accountService.withdraw(clientAccountsList.get(0).getAccountNumber(), value);
+                } catch (InputMismatchException e) {
+                    System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                }
+            }
+
+            System.out.println("\nDeseja efetuar outro saque?(S/N)");
+            clientOption = validateClientOptionYesOrNo();
+            if (clientOption != 'S') {
+                runningWithdrawFromAccount = true;
+            }
+        }
+    }
+
     private void depositOnClientAccount(Client client) throws AccountNotFoundException {
         clientAccountsList = accountService.findAccountsByCPF(client.getCpf());
 
         boolean runningDepositMenu = false;
         char clientOption = ' ';
 
-        while(!runningDepositMenu){
+        while (!runningDepositMenu) {
             if (clientAccountsList.size() > 1) {
                 System.out.println("\nVimos aqui que você possui mais de uma conta conosco.\n");
 
@@ -578,8 +961,8 @@ public class ClientService {
                     Account accountToCheck = null;
 
                     for (Account account : clientAccountsList) {
-                        if(account.getAccountNumber() != accountNumber) {
-                            System.out.println("Buscando...");
+                        if (account.getAccountNumber() != accountNumber) {
+                            System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
                         } else {
                             accountToCheck = accountService.findAccountByNumber(accountNumber);
 
@@ -594,7 +977,7 @@ public class ClientService {
                         }
                     }
 
-                    if(accountToCheck == null){
+                    if (accountToCheck == null) {
                         throw new AccountNotFoundException(
                                 "\n"
                                         + AnsiColors.ANSI_RED.getAnsiColorCode()
@@ -655,9 +1038,9 @@ public class ClientService {
 
                     Account accountToCheck = null;
 
-                    for(Account account : clientAccountsList){
-                        if(account.getAccountNumber() != accountNumber){
-                            System.out.println("Buscando...");
+                    for (Account account : clientAccountsList) {
+                        if (account.getAccountNumber() != accountNumber) {
+                            System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
                         } else {
                             accountToCheck = accountService.findAccountByNumber(accountNumber);
 
@@ -672,7 +1055,7 @@ public class ClientService {
                         }
                     }
 
-                    if(accountToCheck == null){
+                    if (accountToCheck == null) {
                         throw new AccountNotFoundException("Conta não está na lista!");
                     }
 

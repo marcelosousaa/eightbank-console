@@ -33,17 +33,8 @@ public class AccountService {
         accountDAO.setAccountOwner(account, cpf);
     }
 
-    public void checkBalance(long accountNumber)   {
-        try{
-            accountDAO.checkBalance(accountNumber);
-        } catch (AccountNotFoundException e){
-            System.out.println(e.getMessage());
-        }
-    }
-
     public void withdraw(long accountNumber, double value) throws InsufficientFundsException, InvalidValueException, AccountNotFoundException {
         accountDAO.withdrawValue(accountNumber, value);
-        checkBalance(accountNumber);
     }
 
     public void deposit(long accountNumber, double value)  {
@@ -52,11 +43,9 @@ public class AccountService {
         } catch (AccountNotFoundException | InvalidValueException e){
             System.out.println(e.getMessage());
         }
-
-
     }
 
-    public void transfer(long originAccountNumber, long targetAccountNumber, double value) {
+    public void transferSameBank(long originAccountNumber, long targetAccountNumber, double value) {
         try {
             accountDAO.withdrawValue(originAccountNumber, value);
             try {
@@ -86,7 +75,6 @@ public class AccountService {
     }
 
     public Account findAccountByNumber(long accountNumber) throws AccountNotFoundException {
-        Account account;
-        return account = accountDAO.findAccountByNumber(accountNumber);
+        return accountDAO.findAccountByNumber(accountNumber);
     }
 }
