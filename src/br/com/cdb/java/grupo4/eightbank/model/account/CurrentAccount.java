@@ -11,6 +11,14 @@ public class CurrentAccount extends Account{
         this.accountFee = accountFee;
     }
 
+    public double getAccountFee() {
+        return accountFee;
+    }
+
+    public void setAccountFee(double accountFee) {
+        this.accountFee = accountFee;
+    }
+
     @Override
     public String toString() {
         return "CurrentAccount{" +

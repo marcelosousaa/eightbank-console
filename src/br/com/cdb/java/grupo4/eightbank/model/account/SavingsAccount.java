@@ -11,6 +11,14 @@ public class SavingsAccount extends Account {
         this.annualPercentageYield = annualPercentageYield;
     }
 
+    public double getAnnualPercentageYield() {
+        return annualPercentageYield;
+    }
+
+    public void setAnnualPercentageYield(double annualPercentageYield) {
+        this.annualPercentageYield = annualPercentageYield;
+    }
+
     @Override
     public String toString() {
         return "SavingsAccount{" +

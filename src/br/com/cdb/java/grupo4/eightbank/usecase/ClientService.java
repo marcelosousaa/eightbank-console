@@ -10,6 +10,8 @@ import br.com.cdb.java.grupo4.eightbank.exceptions.ClientNotFoundException;
 import br.com.cdb.java.grupo4.eightbank.exceptions.InsufficientFundsException;
 import br.com.cdb.java.grupo4.eightbank.exceptions.InvalidValueException;
 import br.com.cdb.java.grupo4.eightbank.model.account.Account;
+import br.com.cdb.java.grupo4.eightbank.model.account.CurrentAccount;
+import br.com.cdb.java.grupo4.eightbank.model.account.SavingsAccount;
 import br.com.cdb.java.grupo4.eightbank.model.client.Address;
 import br.com.cdb.java.grupo4.eightbank.model.client.Client;
 import br.com.cdb.java.grupo4.eightbank.utils.*;
@@ -490,6 +492,7 @@ public class ClientService {
             } else {
                 System.out.println(
                         "\nNao foi possivel realizar o login, verifique seus dados e tente novamente.\n");
+                break;
             }
         }
         return client;
@@ -585,7 +588,8 @@ public class ClientService {
         }
     }
 
-    private void showProfileEditor(Client client) throws ClientNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
+    private void showProfileEditor(Client client)
+            throws ClientNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, AccountNotFoundException {
         showClientProfile(client);
 
         boolean runningProfileEditMenu = false;
@@ -760,10 +764,10 @@ public class ClientService {
                 int option = new Scanner(System.in).nextInt();
                 switch (option) {
                     case 1:
-                        while (true){
+                        while (true) {
                             System.out.println("Certo, qual o nome da rua?");
                             String newStreetName = new Scanner(System.in).nextLine();
-                            if(newStreetName.isEmpty()){
+                            if (newStreetName.isEmpty()) {
                                 System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
                             } else {
                                 clientDAO.updateClientProfileAddressStreetName(client, newStreetName);
@@ -772,17 +776,17 @@ public class ClientService {
                         }
                         break;
                     case 2:
-                        while (true){
+                        while (true) {
                             System.out.println("Certo, qual o número");
                             String newNumber = new Scanner(System.in).nextLine();
-                            if(newNumber.isEmpty()){
+                            if (newNumber.isEmpty()) {
                                 System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
                             } else {
-                                try{
+                                try {
                                     long newNumberConverted = Long.parseLong(newNumber);
                                     clientDAO.updateClientProfileAddressNumber(client, newNumberConverted);
                                     break;
-                                } catch (Exception e){
+                                } catch (Exception e) {
                                     System.out.println(e.getMessage());
                                     e.printStackTrace();
                                 }
@@ -790,10 +794,10 @@ public class ClientService {
                         }
                         break;
                     case 3:
-                        while (true){
+                        while (true) {
                             System.out.println("Certo, qual o Bairro?");
                             String newDistrictName = new Scanner(System.in).nextLine();
-                            if(newDistrictName.isEmpty()){
+                            if (newDistrictName.isEmpty()) {
                                 System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
                             } else {
                                 clientDAO.updateClientProfileAddressDistrictName(client, newDistrictName);
@@ -802,10 +806,10 @@ public class ClientService {
                         }
                         break;
                     case 4:
-                        while (true){
+                        while (true) {
                             System.out.println("Certo, qual a cidade?");
                             String newCityName = new Scanner(System.in).nextLine();
-                            if(newCityName.isEmpty()){
+                            if (newCityName.isEmpty()) {
                                 System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
                             } else {
                                 clientDAO.updateClientProfileAddressCityName(client, newCityName);
@@ -814,10 +818,10 @@ public class ClientService {
                         }
                         break;
                     case 5:
-                        while (true){
+                        while (true) {
                             System.out.println("Certo, qual o estado?");
                             String newStateName = new Scanner(System.in).nextLine();
-                            if(newStateName.isEmpty()){
+                            if (newStateName.isEmpty()) {
                                 System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
                             } else {
                                 clientDAO.updateClientProfileAddressStateName(client, newStateName);
@@ -826,13 +830,13 @@ public class ClientService {
                         }
                         break;
                     case 6:
-                        while (true){
+                        while (true) {
                             System.out.println("Certo, qual o CEP?");
                             String newZipCode = new Scanner(System.in).nextLine();
-                            if(newZipCode.isEmpty()){
+                            if (newZipCode.isEmpty()) {
                                 System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
                             } else {
-                                if(!ZipCodeValidator.validateZipCode(newZipCode)){
+                                if (!ZipCodeValidator.validateZipCode(newZipCode)) {
                                     System.out.println(SystemMessages.INVALID_ZIP_CODE.getFieldName());
                                 } else {
                                     clientDAO.updateClientProfileAddressCep(client, newZipCode);
@@ -842,10 +846,10 @@ public class ClientService {
                         }
                         break;
                     case 7:
-                        while (true){
+                        while (true) {
                             System.out.println("Certo, qual o complemento?");
                             String newAddressComplement = new Scanner(System.in).nextLine();
-                            if(newAddressComplement.isEmpty()){
+                            if (newAddressComplement.isEmpty()) {
                                 System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
                             } else {
                                 clientDAO.updateClientProfileAddressComplement(client, newAddressComplement);
@@ -866,10 +870,11 @@ public class ClientService {
         }
     }
 
-    private void showClientProfile(Client client) {
+    private void showClientProfile(Client client) throws AccountNotFoundException {
         System.out.println("Bem vindo ao seu perfil. "
                 + "Aqui você pode conferir os seus dados\n");
 
+        // DADOS PESSOAIS
         System.out.println(
                 "CPF: " + client.getCpf()
                         + "\nNome: " + client.getName()
@@ -881,6 +886,7 @@ public class ClientService {
                         + "\nRenda Informada: R$" + client.getGrossMonthlyIncome() + "\n"
         );
 
+        // ENDEREÇO
         System.out.println("Endereço\n"
                 + "=============================="
                 + "\nRua: " + client.getAddress().getStreetName() + ", " + client.getAddress().getNumber()
@@ -889,12 +895,36 @@ public class ClientService {
                 + "\nEstado: " + client.getAddress().getState()
                 + "\nCEP: " + client.getAddress().getZipCode()
         );
-
         if (client.getAddress().getAddressComplement() == null) {
             System.out.println("Complemento: Não informado.\n");
         } else {
             System.out.println("Complemento: " + client.getAddress().getAddressComplement() + "\n");
         }
+
+        //CONTAS
+        clientAccountsList = accountService.findAccountsByCPF(client.getCpf());
+
+        System.out.println("Contas encontradas: \n");
+
+        for (Account account : clientAccountsList) {
+            System.out.println(
+                    "Número da conta: " + account.getAccountNumber()
+                            + "\nTipo da Conta: " + account.getAccountType().getAccountTypeName()
+                            + "\nSaldo: " + account.getBalance()
+            );
+            if(account instanceof CurrentAccount){
+                System.out.println("Taxa mensal: " + ((CurrentAccount) account).getAccountFee() + "\n");
+            } else {
+                System.out.println("Rendimento anual: " +((SavingsAccount) account).getAnnualPercentageYield() +"\n");
+            }
+        }
+
+
+        //CARTÕES
+
+        //SEGUROS
+
+
     }
 
     private void showTransferMenu(Client client) throws AccountNotFoundException, InvalidValueException, InsufficientFundsException {
