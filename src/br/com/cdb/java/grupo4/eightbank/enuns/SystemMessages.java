@@ -2,6 +2,7 @@ package br.com.cdb.java.grupo4.eightbank.enuns;
 
 public enum SystemMessages {
 
+    WARNING_EMPTY_OR_NULL_FIELD("Campo não pode ser nulo ou vazio!"),
     MANDATORY_FIELD_PT_BR("Campo obrigatório!"),
     INVALID_ZIP_CODE("CEP inválido!"),
     INVALID_CHARACTER("Caracter inválido!"),

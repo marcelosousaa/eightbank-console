@@ -639,6 +639,7 @@ public class ClientService {
                 runningProfileEditMenu = true;
             }
         }
+        showClientProfile(client);
     }
 
     private void updateProfileField(Client client, String field) throws ClientNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
@@ -701,7 +702,7 @@ public class ClientService {
                     if (newPhoneNumber.isEmpty()) {
                         System.err.println("Telefone não pode ser vazio!");
                     } else {
-                        if(!PhoneNumberValidator.validatePhoneNumber(newPhoneNumber)){
+                        if (!PhoneNumberValidator.validatePhoneNumber(newPhoneNumber)) {
                             System.out.println(SystemMessages.INVALID_FORMAT.getFieldName());
                         } else {
                             clientDAO.updateClientProfilePhoneNumber(client, newPhoneNumber);
@@ -719,12 +720,11 @@ public class ClientService {
                     if (newGrossMonthlyIncome.isEmpty()) {
                         System.err.println("Telefone não pode ser vazio!");
                     } else {
-
                         try {
                             double value = Double.parseDouble(newGrossMonthlyIncome);
                             clientDAO.updateClientProfileGrossMonthlyIncome(client, value);
                             break;
-                        } catch (Exception e){
+                        } catch (Exception e) {
                             System.out.println(e.getMessage());
                             e.printStackTrace();
                         }
@@ -733,7 +733,7 @@ public class ClientService {
                 break;
 
             case "endereço":
-                //address update methods
+                updateProfileAddress(client);
                 break;
 
             default:
@@ -743,9 +743,132 @@ public class ClientService {
 
     }
 
+    private void updateProfileAddress(Client client) throws ClientNotFoundException {
+        boolean runningUpdateProfileAddressMenu = false;
+        while (!runningUpdateProfileAddressMenu) {
+            System.out.println("Selecione a informação que deseja atualizar: "
+                    + "\n1 - Nome do Endereço"
+                    + "\n2 - Número do Endereço"
+                    + "\n3 - Bairro"
+                    + "\n4 - Cidade"
+                    + "\n5 - Estado"
+                    + "\n6 - CEP"
+                    + "\n7 - Complemento"
+                    + "\n0 - Voltar");
+
+            try {
+                int option = new Scanner(System.in).nextInt();
+                switch (option) {
+                    case 1:
+                        while (true){
+                            System.out.println("Certo, qual o nome da rua?");
+                            String newStreetName = new Scanner(System.in).nextLine();
+                            if(newStreetName.isEmpty()){
+                                System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
+                            } else {
+                                clientDAO.updateClientProfileAddressStreetName(client, newStreetName);
+                                break;
+                            }
+                        }
+                        break;
+                    case 2:
+                        while (true){
+                            System.out.println("Certo, qual o número");
+                            String newNumber = new Scanner(System.in).nextLine();
+                            if(newNumber.isEmpty()){
+                                System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
+                            } else {
+                                try{
+                                    long newNumberConverted = Long.parseLong(newNumber);
+                                    clientDAO.updateClientProfileAddressNumber(client, newNumberConverted);
+                                    break;
+                                } catch (Exception e){
+                                    System.out.println(e.getMessage());
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                        break;
+                    case 3:
+                        while (true){
+                            System.out.println("Certo, qual o Bairro?");
+                            String newDistrictName = new Scanner(System.in).nextLine();
+                            if(newDistrictName.isEmpty()){
+                                System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
+                            } else {
+                                clientDAO.updateClientProfileAddressDistrictName(client, newDistrictName);
+                                break;
+                            }
+                        }
+                        break;
+                    case 4:
+                        while (true){
+                            System.out.println("Certo, qual a cidade?");
+                            String newCityName = new Scanner(System.in).nextLine();
+                            if(newCityName.isEmpty()){
+                                System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
+                            } else {
+                                clientDAO.updateClientProfileAddressCityName(client, newCityName);
+                                break;
+                            }
+                        }
+                        break;
+                    case 5:
+                        while (true){
+                            System.out.println("Certo, qual o estado?");
+                            String newStateName = new Scanner(System.in).nextLine();
+                            if(newStateName.isEmpty()){
+                                System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
+                            } else {
+                                clientDAO.updateClientProfileAddressStateName(client, newStateName);
+                                break;
+                            }
+                        }
+                        break;
+                    case 6:
+                        while (true){
+                            System.out.println("Certo, qual o CEP?");
+                            String newZipCode = new Scanner(System.in).nextLine();
+                            if(newZipCode.isEmpty()){
+                                System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
+                            } else {
+                                if(!ZipCodeValidator.validateZipCode(newZipCode)){
+                                    System.out.println(SystemMessages.INVALID_ZIP_CODE.getFieldName());
+                                } else {
+                                    clientDAO.updateClientProfileAddressCep(client, newZipCode);
+                                    break;
+                                }
+                            }
+                        }
+                        break;
+                    case 7:
+                        while (true){
+                            System.out.println("Certo, qual o complemento?");
+                            String newAddressComplement = new Scanner(System.in).nextLine();
+                            if(newAddressComplement.isEmpty()){
+                                System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
+                            } else {
+                                clientDAO.updateClientProfileAddressComplement(client, newAddressComplement);
+                                break;
+                            }
+                        }
+                        break;
+                    case 0:
+                        System.out.println("Saindo...");
+                        runningUpdateProfileAddressMenu = true;
+                        break;
+                    default:
+                        System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
+                }
+            } catch (InputMismatchException e) {
+                System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+            }
+        }
+    }
+
     private void showClientProfile(Client client) {
-        System.out.println("Bem vindo ao seu perfil."
-                + "Aqui você pode conferir os seus dados");
+        System.out.println("Bem vindo ao seu perfil. "
+                + "Aqui você pode conferir os seus dados\n");
 
         System.out.println(
                 "CPF: " + client.getCpf()
@@ -753,12 +876,12 @@ public class ClientService {
                         + "\nData de Nascimento: " + client.getDateOfBirth()
                         + "\nTelefone: " + client.getPhoneNumber()
                         + "\nE-mail: " + client.getEmail()
-                        + "\n Senha: **********"
-                        + "\n Categoria: " + client.getClientCategory()
-                        + "\n Renda Informada: " + client.getGrossMonthlyIncome() + "\n"
+                        + "\nSenha: **********"
+                        + "\nCategoria: " + client.getClientCategory()
+                        + "\nRenda Informada: R$" + client.getGrossMonthlyIncome() + "\n"
         );
 
-        System.out.println("Endereço\n\n"
+        System.out.println("Endereço\n"
                 + "=============================="
                 + "\nRua: " + client.getAddress().getStreetName() + ", " + client.getAddress().getNumber()
                 + "\nBairro: " + client.getAddress().getDistrict()
