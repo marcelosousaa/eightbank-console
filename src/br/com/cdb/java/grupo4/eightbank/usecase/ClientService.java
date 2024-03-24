@@ -737,16 +737,28 @@ public class ClientService {
                 pixKey = new Scanner(System.in).nextLine();
                 switch (inputPixKeyMenuOption){
                     case 1:
-                        CPFValidator.validateCPF(pixKey);
+                        if(CPFValidator.validateCPF(pixKey)){
+                            return pixKey;
+                        } else{
+                            System.out.println("Falha ao validar o CPF");
+                        }
                         break;
                     case 2:
                         //CNPJValidator.validateCNPJ(pixKey);
                         break;
                     case 3:
-                        EmailValidator.validateEmail(pixKey);
+                        if(EmailValidator.validateEmail(pixKey)){
+                            return pixKey;
+                        } else{
+                            System.out.println("Falha ao validar o E-mail");
+                        }
                         break;
                     case 4:
-                        PhoneNumberValidator.validatePhoneNumber(pixKey);
+                        if(PhoneNumberValidator.validatePhoneNumber(pixKey)){
+                            return pixKey;
+                        } else{
+                            System.out.println("Falha ao validar o CPF");
+                        }
                         break;
                     case 5:
                         break;
