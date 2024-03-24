@@ -6,6 +6,7 @@ import br.com.cdb.java.grupo4.eightbank.enuns.AnsiColors;
 import br.com.cdb.java.grupo4.eightbank.enuns.ClientCategory;
 import br.com.cdb.java.grupo4.eightbank.enuns.SystemMessages;
 import br.com.cdb.java.grupo4.eightbank.exceptions.AccountNotFoundException;
+import br.com.cdb.java.grupo4.eightbank.exceptions.ClientNotFoundException;
 import br.com.cdb.java.grupo4.eightbank.exceptions.InsufficientFundsException;
 import br.com.cdb.java.grupo4.eightbank.exceptions.InvalidValueException;
 import br.com.cdb.java.grupo4.eightbank.model.account.Account;
@@ -23,11 +24,9 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
+import java.util.spi.AbstractResourceBundleProvider;
 
 public class ClientService {
-
-    public static final String ANSI_RED = "\u001B[31m";
-    public static final String ANSI_RESET = "\u001B[0m";
     List<Account> clientAccountsList;
     CardService cardService = new CardService();
     InsuranceService insuranceService = new InsuranceService();
@@ -200,7 +199,15 @@ public class ClientService {
             }
         }
 
-        return new Address(streetName, number, district, city, state, zipCode);
+        System.out.println("Se o endereço possui complemento, digite abaixo, por favor. Enter para continuar.");
+        String addressComplement;
+        addressComplement = new Scanner(System.in).nextLine();
+
+        if (addressComplement.isEmpty()) {
+            return new Address(streetName, number, district, city, state, zipCode);
+        } else {
+            return new Address(streetName, number, district, city, state, zipCode, addressComplement);
+        }
     }
 
     private LocalDate inputDateOfBirth() {
@@ -255,13 +262,14 @@ public class ClientService {
         while (true) {
             System.out.println("Digite seu nome: ");
             name = new Scanner(System.in).nextLine();
-            if (name.isEmpty()) {
-                System.out.println(SystemMessages.MANDATORY_FIELD_PT_BR.getFieldName());
+
+            if (!NameValidator.validateName(name)) {
+                System.out.println("O nome digitado não atende aos parametros estabelecidos no sistema."
+                        + "\nPor favor, digite novamente.");
             } else {
-                break;
+                return name;
             }
         }
-        return name;
     }
 
     private String inputEmail() {
@@ -557,6 +565,13 @@ public class ClientService {
                     case 5:
                         cardService.showCardMenu(client);
                         break;
+                    case 6:
+                        try {
+                            showProfileEditor(client);
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                        }
+                        break;
                     case 0:
                         System.out.println("Saindo...");
                         runningClientMenu = true;
@@ -567,6 +582,195 @@ public class ClientService {
             } catch (InputMismatchException e) {
                 System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
             }
+        }
+    }
+
+    private void showProfileEditor(Client client) throws ClientNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
+        showClientProfile(client);
+
+        boolean runningProfileEditMenu = false;
+        while (!runningProfileEditMenu) {
+            System.out.println("Deseja atualizar alguma informação do perfil(S/N)?");
+            char clientOption = validateClientOptionYesOrNo();
+
+            if (clientOption == 'S') {
+                System.out.println(
+                        "Selecione uma opção no menu abaixo para atualizar:"
+                                + "\n 1 - Nome"
+                                + "\n 2 - E-mail"
+                                + "\n 3 - Senha"
+                                + "\n 4 - Telefone"
+                                + "\n 5 - Renda"
+                                + "\n 6 - Endereço"
+                                + "\n 0 - Sair"
+                );
+                try {
+                    int profileEditMenuOption = new Scanner(System.in).nextInt();
+                    switch (profileEditMenuOption) {
+                        case 1:
+                            updateProfileField(client, "nome");
+                            break;
+                        case 2:
+                            updateProfileField(client, "email");
+                            break;
+                        case 3:
+                            updateProfileField(client, "senha");
+                            break;
+                        case 4:
+                            updateProfileField(client, "telefone");
+                            break;
+                        case 5:
+                            updateProfileField(client, "renda");
+                            break;
+                        case 6:
+                            updateProfileField(client, "endereço");
+                            break;
+                        case 0:
+                            System.out.println("Saindo...");
+                            runningProfileEditMenu = true;
+                            break;
+                        default:
+                            System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
+                    }
+                } catch (InputMismatchException e) {
+                    System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
+                }
+            } else {
+                runningProfileEditMenu = true;
+            }
+        }
+    }
+
+    private void updateProfileField(Client client, String field) throws ClientNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
+        switch (field) {
+            case "nome":
+                while (true) {
+                    System.out.println("Certo, como gostaria de ser chamado à partir de agora?");
+                    String newProfileName = new Scanner(System.in).nextLine();
+
+                    if (newProfileName.isEmpty()) {
+                        System.out.println("Novo campo nome está vazio! Deseja prosseguir mesmo assim?(S/N)");
+                        char option = validateClientOptionYesOrNo();
+                        if (option == 'S') {
+                            clientDAO.updateClientProfileName(client, newProfileName);
+                            break;
+                        }
+                    } else {
+                        clientDAO.updateClientProfileName(client, newProfileName);
+                        break;
+                    }
+
+                    break;
+                }
+                break;
+
+            case "email":
+                while (true) {
+                    System.out.println("Certo, qual seu novo email?");
+                    String newProfileEmail = new Scanner(System.in).nextLine();
+
+                    if (newProfileEmail.isEmpty()) {
+                        System.err.println("Novo e-mail não pode estar vazio!");
+                    } else {
+                        clientDAO.updateClientProfileEmail(client, newProfileEmail);
+                        break;
+                    }
+                }
+                break;
+
+            case "senha":
+                while (true) {
+                    System.out.println("Certo, qual sua nova senha?");
+                    String newPassword = new Scanner(System.in).nextLine();
+
+                    if (newPassword.isEmpty()) {
+                        System.err.println("Senha não pode ser vazia!");
+                    } else {
+                        newPassword = PasswordService.generateStrongPassword(newPassword);
+                        clientDAO.updateClientProfilePassword(client, newPassword);
+                        break;
+                    }
+                }
+                break;
+
+            case "telefone":
+                while (true) {
+                    System.out.println("Certo, qual seu novo telefone?");
+                    String newPhoneNumber = new Scanner(System.in).nextLine();
+
+                    if (newPhoneNumber.isEmpty()) {
+                        System.err.println("Telefone não pode ser vazio!");
+                    } else {
+                        if(!PhoneNumberValidator.validatePhoneNumber(newPhoneNumber)){
+                            System.out.println(SystemMessages.INVALID_FORMAT.getFieldName());
+                        } else {
+                            clientDAO.updateClientProfilePhoneNumber(client, newPhoneNumber);
+                        }
+                        break;
+                    }
+                }
+                break;
+
+            case "renda":
+                while (true) {
+                    System.out.println("Certo, qual sua nova renda?");
+                    String newGrossMonthlyIncome = new Scanner(System.in).nextLine();
+
+                    if (newGrossMonthlyIncome.isEmpty()) {
+                        System.err.println("Telefone não pode ser vazio!");
+                    } else {
+
+                        try {
+                            double value = Double.parseDouble(newGrossMonthlyIncome);
+                            clientDAO.updateClientProfileGrossMonthlyIncome(client, value);
+                            break;
+                        } catch (Exception e){
+                            System.out.println(e.getMessage());
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                break;
+
+            case "endereço":
+                //address update methods
+                break;
+
+            default:
+                SystemMessages.INVALID_OPTION.getFieldName();
+        }
+
+
+    }
+
+    private void showClientProfile(Client client) {
+        System.out.println("Bem vindo ao seu perfil."
+                + "Aqui você pode conferir os seus dados");
+
+        System.out.println(
+                "CPF: " + client.getCpf()
+                        + "\nNome: " + client.getName()
+                        + "\nData de Nascimento: " + client.getDateOfBirth()
+                        + "\nTelefone: " + client.getPhoneNumber()
+                        + "\nE-mail: " + client.getEmail()
+                        + "\n Senha: **********"
+                        + "\n Categoria: " + client.getClientCategory()
+                        + "\n Renda Informada: " + client.getGrossMonthlyIncome() + "\n"
+        );
+
+        System.out.println("Endereço\n\n"
+                + "=============================="
+                + "\nRua: " + client.getAddress().getStreetName() + ", " + client.getAddress().getNumber()
+                + "\nBairro: " + client.getAddress().getDistrict()
+                + "\nCidade: " + client.getAddress().getCity()
+                + "\nEstado: " + client.getAddress().getState()
+                + "\nCEP: " + client.getAddress().getZipCode()
+        );
+
+        if (client.getAddress().getAddressComplement() == null) {
+            System.out.println("Complemento: Não informado.\n");
+        } else {
+            System.out.println("Complemento: " + client.getAddress().getAddressComplement() + "\n");
         }
     }
 
@@ -680,11 +884,11 @@ public class ClientService {
                 System.out.println("Localizamos sua conta. Confira os detalhes abaixo: ");
                 System.out.println(" - " + clientAccountsList.get(0).getAccountNumber());
 
-                while (true){
+                while (true) {
                     System.out.println("Digite a chave PIX para qual deseja efetuar a transferencia: ");
                     pixKey = new Scanner(System.in).nextLine();
 
-                    if(pixKey.isEmpty()){
+                    if (pixKey.isEmpty()) {
                         System.err.println("Valor vazio!");
                     } else {
                         break;
@@ -718,7 +922,7 @@ public class ClientService {
         boolean inputPixKeyMenu = false;
         int inputPixKeyMenuOption = 0;
 
-        while (!inputPixKeyMenu){
+        while (!inputPixKeyMenu) {
             System.out.println("""
                     Selecione uma opção abaixo:
                     1 - CPF
@@ -730,33 +934,29 @@ public class ClientService {
             );
 
             inputPixKeyMenuOption = new Scanner(System.in).nextInt();
-            if(inputPixKeyMenuOption < 0 || inputPixKeyMenuOption > 5){
+            if (inputPixKeyMenuOption < 0 || inputPixKeyMenuOption > 5) {
                 System.err.println(SystemMessages.INVALID_OPTION.getFieldName());
             } else {
                 System.out.println("Digite a chave PIX: ");
                 pixKey = new Scanner(System.in).nextLine();
-                switch (inputPixKeyMenuOption){
+                switch (inputPixKeyMenuOption) {
                     case 1:
-                        if(CPFValidator.validateCPF(pixKey)){
-                            return pixKey;
-                        } else{
+                        if (!CPFValidator.validateCPF(pixKey)) {
                             System.out.println("Falha ao validar o CPF");
                         }
                         break;
                     case 2:
-                        //CNPJValidator.validateCNPJ(pixKey);
+                        //if(!CNPJValidator.validateCNPJ(pixKey)){
+                        //             System.out.println("Falha ao validar o CNPJ");
+                        //}
                         break;
                     case 3:
-                        if(EmailValidator.validateEmail(pixKey)){
-                            return pixKey;
-                        } else{
+                        if (!EmailValidator.validateEmail(pixKey)) {
                             System.out.println("Falha ao validar o E-mail");
                         }
                         break;
                     case 4:
-                        if(PhoneNumberValidator.validatePhoneNumber(pixKey)){
-                            return pixKey;
-                        } else{
+                        if (!PhoneNumberValidator.validatePhoneNumber(pixKey)) {
                             System.out.println("Falha ao validar o CPF");
                         }
                         break;

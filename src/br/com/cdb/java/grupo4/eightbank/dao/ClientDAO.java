@@ -1,5 +1,7 @@
 package br.com.cdb.java.grupo4.eightbank.dao;
 
+import br.com.cdb.java.grupo4.eightbank.enuns.SystemMessages;
+import br.com.cdb.java.grupo4.eightbank.exceptions.ClientNotFoundException;
 import br.com.cdb.java.grupo4.eightbank.model.client.Client;
 
 import java.util.ArrayList;
@@ -50,5 +52,107 @@ public class ClientDAO {
                 break;
         }
         return false;
+    }
+
+    public void updateClientProfileName(Client client, String value)
+            throws ClientNotFoundException {
+
+        boolean clientSearchResult = false;
+
+        for (Client c : this.clientList){
+            if(!c.equals(client)){
+                System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
+            }else {
+                clientSearchResult = true;
+                c.setName(value);
+            }
+        }
+
+        if(!clientSearchResult)
+        {
+            throw new ClientNotFoundException("Não encontramos seu cadastro :/");
+        }
+
+    }
+
+    public void updateClientProfileEmail(Client client, String value)
+            throws ClientNotFoundException {
+
+        boolean clientSearchResult = false;
+
+        for (Client c : this.clientList){
+            if(!c.equals(client)){
+                System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
+            }else {
+                clientSearchResult = true;
+                c.setEmail(value);
+            }
+        }
+
+        if(!clientSearchResult)
+        {
+            throw new ClientNotFoundException("Não encontramos seu cadastro :/");
+        }
+
+    }
+
+    public void updateClientProfilePassword(Client client, String value)
+            throws ClientNotFoundException {
+
+        boolean clientSearchResult = false;
+
+        for (Client c : this.clientList){
+            if(!c.equals(client)){
+                System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
+            }else {
+                clientSearchResult = true;
+                c.setPassword(value);
+            }
+        }
+
+        if(!clientSearchResult)
+        {
+            throw new ClientNotFoundException("Não encontramos seu cadastro :/");
+        }
+    }
+
+    public void updateClientProfilePhoneNumber(Client client, String value) throws ClientNotFoundException {
+
+        boolean clientSearchResult = false;
+
+        for (Client c : this.clientList){
+            if(!c.equals(client)){
+                System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
+            }else {
+                clientSearchResult = true;
+                c.setPhoneNumber(value);
+            }
+        }
+
+        if(!clientSearchResult)
+        {
+            throw new ClientNotFoundException("Não encontramos seu cadastro :/");
+        }
+    }
+
+    public void updateClientProfileGrossMonthlyIncome(Client client, double value)
+            throws ClientNotFoundException {
+
+        boolean clientSearchResult = false;
+
+        for (Client c : this.clientList){
+            if(!c.equals(client)){
+                System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
+            }else {
+                clientSearchResult = true;
+                c.setGrossMonthlyIncome(value);
+            }
+        }
+
+        if(!clientSearchResult)
+        {
+            throw new ClientNotFoundException("Não encontramos seu cadastro :/");
+        }
+
     }
 }
