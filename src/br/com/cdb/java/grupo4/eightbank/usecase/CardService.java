@@ -2,7 +2,8 @@ package br.com.cdb.java.grupo4.eightbank.usecase;
 
 import br.com.cdb.java.grupo4.eightbank.model.card.Card;
 import br.com.cdb.java.grupo4.eightbank.model.card.CardFactory;
-import br.com.cdb.java.grupo4.eightbank.model.card.CardType;
+import br.com.cdb.java.grupo4.eightbank.enuns.CardType;
+
 import java.time.LocalDate;
 import java.util.Scanner;
 
