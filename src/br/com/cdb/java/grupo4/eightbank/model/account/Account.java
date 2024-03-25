@@ -1,6 +1,7 @@
 package br.com.cdb.java.grupo4.eightbank.model.account;
 
 import br.com.cdb.java.grupo4.eightbank.enuns.AccountType;
+import br.com.cdb.java.grupo4.eightbank.model.interfaces.ITaxable;
 
 public abstract class Account {
     private long accountNumber;

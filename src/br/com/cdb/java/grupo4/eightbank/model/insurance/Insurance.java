@@ -45,8 +45,19 @@ public class Insurance {
         return insuranceType;
     }
 
+
     public String getClientCPF() {
         return clientCPF;
     }
-
+  
+    @Override
+    public String toString() {
+        return "Insurance{" +
+                "policyNumber=" + policyNumber +
+                ", issueDate=" + issueDate +
+                ", policyValue=" + policyValue +
+                ", policyConditions='" + policyConditions + '\'' +
+                ", insuranceType=" + insuranceType +
+                '}';
+    }
 }

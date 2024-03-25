@@ -11,7 +11,7 @@ clientService.importClientsFromFile("clients.csv");
 
 ### Automação para importação de clientes ###
 
-- Inserir arquivo exclusivamente no formato '.csv'
+- Inserir arquivo exclusivamente no formato '.csv', no diretório raíz da aplicação
 
 #### LAYOUT DO ARQUIVO #####
 
@@ -42,7 +42,7 @@ If you DO NOT want to use the client import feature, please follow the instructi
 
 #### Clients import automation ####
 
-- Insert files exclusively in the '.csv' format
+- Insert files exclusively in the '.csv' format, in the root directory
 
 #### FILE LAYOUT #####
 
