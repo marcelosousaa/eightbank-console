@@ -1,5 +1,4 @@
 package br.com.cdb.java.grupo4.eightbank.model.card;
-
 import java.time.LocalDate;
 
 public abstract class Card {

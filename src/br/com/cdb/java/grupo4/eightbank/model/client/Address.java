@@ -1,6 +1,4 @@
-package br.com.cdb.java.grupo4.eightbank.model.user.client;
-
-import br.com.cdb.java.grupo4.eightbank.enuns.State;
+package br.com.cdb.java.grupo4.eightbank.model.client;
 
 public class Address {
     private String streetName;
@@ -9,6 +7,7 @@ public class Address {
     private String city;
     private String state;  //ENUM
     private String zipCode;
+    private String addressComplement;
 
     public Address(String streetName, long number, String district, String city, String state, String zipCode) {
         this.streetName = streetName;
@@ -17,6 +16,16 @@ public class Address {
         this.city = city;
         this.state = state;
         this.zipCode = zipCode;
+    }
+
+    public Address(String streetName, long number, String district, String city, String state, String zipCode, String addressComplement) {
+        this.streetName = streetName;
+        this.number = number;
+        this.district = district;
+        this.city = city;
+        this.state = state;
+        this.zipCode = zipCode;
+        this.addressComplement = addressComplement;
     }
 
     public String getStreetName() {
@@ -65,5 +74,25 @@ public class Address {
 
     public void setZipCode(String zipCode) {
         this.zipCode = zipCode;
+    }
+
+    public String getAddressComplement() {
+        return addressComplement;
+    }
+
+    public void setAddressComplement(String addressComplement) {
+        this.addressComplement = addressComplement;
+    }
+
+    @Override
+    public String toString() {
+        return "Address{" +
+                "streetName='" + streetName + '\'' +
+                ", number=" + number +
+                ", district='" + district + '\'' +
+                ", city='" + city + '\'' +
+                ", state='" + state + '\'' +
+                ", zipCode='" + zipCode + '\'' +
+                '}';
     }
 }

@@ -1,27 +1,20 @@
 package br.com.cdb.java.grupo4.eightbank.model.account;
 
 import br.com.cdb.java.grupo4.eightbank.enuns.AccountType;
-import br.com.cdb.java.grupo4.eightbank.model.user.client.Client;
+import br.com.cdb.java.grupo4.eightbank.model.client.Client;
 
-public class Account {
-    private long branch;
+public abstract class Account {
     private long accountNumber;
     private double balance;
     private AccountType accountType;
-    private Client owner;
+    private String ownerCPF;
 
-    public Account(AccountType accountType) {
-        this.branch = 1;
-        this.balance = 0;
+    public Account(double balance, AccountType accountType, String ownerCPF) {
+        this.balance = balance;
         this.accountType = accountType;
+        this.ownerCPF = ownerCPF;
     }
 
-    public long getBranch() {
-        return branch;
-    }
-    public void setBranch(long branch) {
-        this.branch = branch;
-    }
     public long getAccountNumber() {
         return accountNumber;
     }
@@ -38,11 +31,19 @@ public class Account {
         this.balance = balance;
     }
 
-    public Client getOwner() {
-        return owner;
+    public String getOwnerCPF(){
+        return this.ownerCPF;
     }
 
-    public void setOwner(Client owner){
-        this.owner = owner;
+    public void setOwnerCPF(String ownerCPF){
+        this.ownerCPF = ownerCPF;
+    }
+
+    public AccountType getAccountType() {
+        return accountType;
+    }
+
+    public void setAccountType(AccountType accountType) {
+        this.accountType = accountType;
     }
 }

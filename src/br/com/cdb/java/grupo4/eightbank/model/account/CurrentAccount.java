@@ -1,13 +1,28 @@
 package br.com.cdb.java.grupo4.eightbank.model.account;
 
 import br.com.cdb.java.grupo4.eightbank.enuns.AccountType;
-import br.com.cdb.java.grupo4.eightbank.model.user.client.Client;
+import br.com.cdb.java.grupo4.eightbank.model.client.Client;
 
 public class CurrentAccount extends Account{
     private double accountFee;
 
-    public CurrentAccount(long branch, long accountNumber, double balance, Client owner, double accountFee) {
-        super(AccountType.CURRENT_ACCOUNT);
+    public CurrentAccount(double balance, String ownerCpf, double accountFee) {
+        super(balance, AccountType.CURRENT_ACCOUNT, ownerCpf);
         this.accountFee = accountFee;
+    }
+
+    public double getAccountFee() {
+        return accountFee;
+    }
+
+    public void setAccountFee(double accountFee) {
+        this.accountFee = accountFee;
+    }
+
+    @Override
+    public String toString() {
+        return "CurrentAccount{" +
+                "accountFee=" + accountFee +
+                "} " + super.toString();
     }
 }

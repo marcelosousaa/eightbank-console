@@ -15,6 +15,6 @@ public class NameValidator {
             return false;
         }
 
-        return nameTrimmed.matches("[a-zA-Z\\\\s]+]");
+        return nameTrimmed.matches("[a-zA-Z\\s]+");
     }
 }

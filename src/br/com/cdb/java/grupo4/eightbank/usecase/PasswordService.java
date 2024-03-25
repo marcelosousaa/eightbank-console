@@ -10,13 +10,15 @@ import java.security.spec.InvalidKeySpecException;
 public class PasswordService {
 
     //GERAR E RETORNA SENHA FORTE
-    public static String generateStrongPassword(String userPassword) throws NoSuchAlgorithmException, InvalidKeySpecException{
+    public static String generateStrongPassword(String userPassword)
+            throws NoSuchAlgorithmException, InvalidKeySpecException{
         String strongPassword = null;
         strongPassword = strongPasswordGenerator(userPassword);
         return strongPassword;
     }
 
-    private static String strongPasswordGenerator(String userPassword) throws NoSuchAlgorithmException, InvalidKeySpecException{
+    private static String strongPasswordGenerator(String userPassword)
+            throws NoSuchAlgorithmException, InvalidKeySpecException{
         int iterations = 1000;
         char[] chars = userPassword.toCharArray();
         byte[] salt = getSalt();
