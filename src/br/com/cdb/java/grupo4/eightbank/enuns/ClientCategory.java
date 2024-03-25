@@ -2,8 +2,8 @@ package br.com.cdb.java.grupo4.eightbank.enuns;
 
 public enum ClientCategory {
 
-    COMMOM ('C', "Comum"),
-    SUPER ('S', "Super"),
+    COMMOM('C', "Comum"),
+    SUPER('S', "Super"),
     PREMIUM('P', "Premium");
 
     private final char categoryCode;

@@ -7,9 +7,7 @@ import br.com.cdb.java.grupo4.eightbank.exceptions.InvalidValueException;
 import br.com.cdb.java.grupo4.eightbank.model.account.Account;
 import br.com.cdb.java.grupo4.eightbank.model.account.CurrentAccount;
 import br.com.cdb.java.grupo4.eightbank.model.account.SavingsAccount;
-import br.com.cdb.java.grupo4.eightbank.model.client.Client;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AccountService {
@@ -37,10 +35,10 @@ public class AccountService {
         accountDAO.withdrawValue(accountNumber, value);
     }
 
-    public void deposit(long accountNumber, double value)  {
-        try{
+    public void deposit(long accountNumber, double value) {
+        try {
             accountDAO.depositValue(accountNumber, value);
-        } catch (AccountNotFoundException | InvalidValueException e){
+        } catch (AccountNotFoundException | InvalidValueException e) {
             System.out.println(e.getMessage());
         }
     }

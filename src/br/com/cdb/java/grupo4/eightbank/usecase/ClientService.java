@@ -284,8 +284,7 @@ public class ClientService {
         String email;
 
         while (true) {
-            System.out.println("Certo, vamos começar o cadastro pelo seu email\n"
-                    + "Digita ele pra gente aqui em baixo: ");
+            System.out.println("Informe seu email: ");
             email = new Scanner(System.in).nextLine();
             if (email.isEmpty()) {
                 System.out.println(SystemMessages.MANDATORY_FIELD_PT_BR.getFieldName());
@@ -293,7 +292,12 @@ public class ClientService {
                 if (!EmailValidator.validateEmail(email)) {
                     System.err.println("Parece que seu e-mail está em um formato inválido...");
                 } else {
-                    break;
+
+                    if(!clientDAO.findClientByEmail(email)){
+                        break;
+                    } else {
+                        System.err.println("E-mail já existe na base de dados!");
+                    }
                 }
             }
         }
@@ -1139,7 +1143,7 @@ public class ClientService {
         return pixKey;
     }
 
-    private void transferToSameBank(Client client) throws  AccountNotFoundException {
+    private void transferToSameBank(Client client) throws AccountNotFoundException {
 
         clientAccountsList = accountService.findAccountsByCPF(client.getCpf());
 
@@ -1203,7 +1207,7 @@ public class ClientService {
                                         }
                                     } catch (AccountNotFoundException e) {
                                         System.out.println(AnsiColors.ANSI_RED + "Conta destino não localizada!" + AnsiColors.ANSI_RESET);
-                                    } catch (InsufficientFundsException | InvalidValueException e){
+                                    } catch (InsufficientFundsException | InvalidValueException e) {
                                         System.out.println(e.getMessage());
                                     }
                                 }
@@ -1264,7 +1268,7 @@ public class ClientService {
                                 break;
                             } catch (InputMismatchException e) {
                                 System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
-                            } catch (InsufficientFundsException | InvalidValueException e){
+                            } catch (InsufficientFundsException | InvalidValueException e) {
                                 System.out.println(e.getMessage());
                             }
                         }
@@ -1319,7 +1323,7 @@ public class ClientService {
                                 System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
                             } catch (InsufficientFundsException e) {
                                 System.err.println("Saldo insuficiente!");
-                            } catch (InvalidValueException e){
+                            } catch (InvalidValueException e) {
                                 System.out.println(e.getMessage());
                             }
                         }
@@ -1355,7 +1359,7 @@ public class ClientService {
                     System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
                 } catch (InsufficientFundsException e) {
                     System.err.println("Saldo insuficiente!");
-                } catch (InvalidValueException e){
+                } catch (InvalidValueException e) {
                     System.out.println(e.getMessage());
                 }
             }
@@ -1533,7 +1537,7 @@ public class ClientService {
         }
     }
 
-    private char validateClientOptionYesOrNo() {
+    public char validateClientOptionYesOrNo() {
         char clientOption = ' ';
 
         while (true) {

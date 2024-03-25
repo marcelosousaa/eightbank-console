@@ -1,7 +1,6 @@
 package br.com.cdb.java.grupo4.eightbank.model.account;
 
 import br.com.cdb.java.grupo4.eightbank.enuns.AccountType;
-import br.com.cdb.java.grupo4.eightbank.model.client.Client;
 
 public class SavingsAccount extends Account {
     private double annualPercentageYield;

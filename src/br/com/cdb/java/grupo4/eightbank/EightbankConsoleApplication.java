@@ -41,14 +41,14 @@ public class EightbankConsoleApplication {
                         case 1:
                             boolean runningLoginMenu = false;
 
-                            while(!runningLoginMenu){
+                            while (!runningLoginMenu) {
                                 if (clientService.clientRegistration()) {
                                     System.out.println("Cadastro realizado com sucesso!");
                                     runningLoginMenu = true;
                                 } else {
                                     System.out.println("Houve um problema no cadastro. Vamos repetir?(S/N)");
                                     try {
-                                        char option = new Scanner(System.in).next().charAt(0);
+                                        char option = clientService.validateClientOptionYesOrNo();
                                         if (option == 'N' || option == 'n') {
                                             System.out.println("Retornando ao menu...\n");
                                             runningLoginMenu = true;
@@ -61,7 +61,7 @@ public class EightbankConsoleApplication {
                             break;
                         case 2:
                             client = clientService.login();
-                            if(client != null){
+                            if (client != null) {
                                 clientService.clientMenu(client);
                             }
                             break;
