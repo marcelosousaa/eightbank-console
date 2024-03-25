@@ -41,7 +41,7 @@ public class ClientService {
             throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidValueException {
 
         String cpf = inputCPF();
-        if(cpf == null){
+        if (cpf == null) {
             return false;
         }
 
@@ -918,10 +918,10 @@ public class ClientService {
                             + "\nTipo da Conta: " + account.getAccountType().getAccountTypeName()
                             + "\nSaldo: " + account.getBalance()
             );
-            if(account instanceof CurrentAccount){
+            if (account instanceof CurrentAccount) {
                 System.out.println("Taxa mensal: " + ((CurrentAccount) account).getAccountFee() + "\n");
             } else {
-                System.out.println("Rendimento anual: " +((SavingsAccount) account).getAnnualPercentageYield() +"\n");
+                System.out.println("Rendimento anual: " + ((SavingsAccount) account).getAnnualPercentageYield() + "\n");
             }
         }
 
@@ -1322,14 +1322,22 @@ public class ClientService {
 
                 System.out.println("Número da Conta - Tipo da Conta");
                 for (Account account : clientAccountsList) {
-                    System.out.println(" - " + account.getAccountNumber()
-                            + " - " + account.getAccountType().getAccountTypeName());
+                    System.out.println(
+                            account.getAccountNumber()
+                                    + " - "
+                                    + account.getAccountType().getAccountTypeName());
                 }
+                System.out.println("0 - Voltar");
 
                 System.out.println("\nPor favor digite o numero da conta que deseja efetuar o depósito: ");
 
                 try {
                     long accountNumber = new Scanner(System.in).nextLong();
+
+                    if (accountNumber == 0) {
+                        System.out.println("Voltando...\n");
+                        break;
+                    }
 
                     Account accountToCheck = null;
 
