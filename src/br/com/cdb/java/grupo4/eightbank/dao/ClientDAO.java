@@ -42,9 +42,9 @@ public class ClientDAO {
         return null;
     }
 
-    public boolean findClientByEmail(String email){
-        for(Client client : this.clientList){
-            if(client.getEmail().equals(email)){
+    public boolean findClientByEmail(String email) {
+        for (Client client : this.clientList) {
+            if (client.getEmail().equals(email)) {
                 return true;
             }
         }
@@ -60,18 +60,6 @@ public class ClientDAO {
         return null;
     }
 
-
-
-    public Client searchClientByCPF(String cpf) {
-        for (Client client : clientList) {
-            if (client.getCpf().equals(cpf)) {
-                return client;
-            }
-            break;
-        }
-        return null;
-    }
-
     public boolean verifyClientPassword(String cpf, String inputPassword) {
         for (Client client : clientList) {
             if (client.getCpf().equals(cpf)) {
@@ -82,11 +70,13 @@ public class ClientDAO {
                     }
                 } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
                     e.printStackTrace();
-                    // Considerar como falha de verificação em caso de exceção
-                    return false;
                 }
             }
-          
+        }
+        return false;
+    }
+
+
     public boolean searchClientByCPF(String cpf) {
         boolean finderStatus = false;
 

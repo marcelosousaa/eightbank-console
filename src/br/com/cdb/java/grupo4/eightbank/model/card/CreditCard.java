@@ -28,6 +28,11 @@ public class CreditCard extends Card {
         return true;
     }
 
+    @Override
+    public void updateLimit(double newLimit) {
+
+    }
+
     public void applyMonthlyInterest() {
         if (currentSpend > limit * 0.8) {
             double interest = (currentSpend - (limit * 0.8)) * 0.05;

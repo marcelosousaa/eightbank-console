@@ -33,7 +33,7 @@ public class ClientService {
 
     private CardDAO cardDAO = new CardDAO(); // Criação de CardDAO
     private ClientDAO clientDAO = new ClientDAO(); // Já existente
-    private CardService cardService = new CardService;
+    private CardService cardService = new CardService(cardDAO, clientDAO);
     private InsuranceService insuranceService = new InsuranceService();
     private AccountService accountService = new AccountService();
     private ClientCategory clientCategory;
@@ -293,7 +293,7 @@ public class ClientService {
                     System.err.println("Parece que seu e-mail está em um formato inválido...");
                 } else {
 
-                    if(!clientDAO.findClientByEmail(email)){
+                    if (!clientDAO.findClientByEmail(email)) {
                         break;
                     } else {
                         System.err.println("E-mail já existe na base de dados!");
@@ -335,7 +335,7 @@ public class ClientService {
                 cpf = new Scanner(System.in).nextLine();
                 if (!CPFValidator.validateCPF(cpf)) {
                     System.out.println("CPF inválido!");
-                } else if (clientDAO.searchClientByCPF(cpf) != null) {
+                } else if (!clientDAO.searchClientByCPF(cpf)) {
                     System.err.println("Usuário já existente na base de dados!");
                     cpf = null;
                     break;
@@ -501,8 +501,9 @@ public class ClientService {
             if (client != null) {
                 System.out.println("\nLogin realizado com sucesso!\n\n" + "Bem-vindo, " + client.getName() + "!");
             } else {
-                System.out.println(
-                        "\nNao foi possivel realizar o login, verifique seus dados e tente novamente.\n");
+                System.out.println(AnsiColors.ANSI_RED.getAnsiColorCode() +
+                        "\nNao foi possivel realizar o login, verifique seus dados e tente novamente.\n"
+                        + AnsiColors.ANSI_RESET.getAnsiColorCode());
                 break;
             }
         }
@@ -1012,12 +1013,11 @@ public class ClientService {
                         } else {
                             senderAccount = account;
 
-                            //System.out.println("Digite a chave PIX: ");
-
                             pixKey = inputPixKey();
-                            try {
-                                pixKey = new Scanner(System.in).nextLine();
 
+                            if (pixKey == null) {
+                                break;
+                            } else {
                                 System.out.println("Digite o valor que deseja transferir: ");
                                 try {
                                     double value = new Scanner(System.in).nextDouble();
@@ -1025,18 +1025,15 @@ public class ClientService {
                                     System.out.println(
                                             "Transferencia realizada com sucesso!\n"
                                                     + "O valor de R$ " + value
-                                                    + "foi transferido para o PIX: " + pixKey
+                                                    + " foi transferido para o PIX: " + pixKey
                                     );
                                     break;
                                 } catch (InputMismatchException e) {
                                     System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
                                 }
-                            } catch (InputMismatchException e) {
-                                System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
                             }
                         }
                     }
-
                     if (senderAccount == null) {
                         throw new AccountNotFoundException(
                                 "\n"
@@ -1046,20 +1043,22 @@ public class ClientService {
                                         + "\n"
                         );
                     }
-
-
                 } catch (InputMismatchException e) {
                     System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
                 }
             } else {
-                System.out.println("Localizamos sua conta. Confira os detalhes abaixo: ");
-                System.out.println(" - " + clientAccountsList.get(0).getAccountNumber());
+                Account clientAccount = clientAccountsList.get(0);
+
+                System.out.println(
+                        "\nNúmero da Conta: " + clientAccount.getAccountNumber()
+                                + "\nTipo da Conta: " + clientAccount.getAccountType().getAccountTypeName()
+                                + "\nSaldo atual: " + clientAccount.getBalance()
+                );
 
                 while (true) {
-                    System.out.println("Digite a chave PIX para qual deseja efetuar a transferencia: ");
-                    pixKey = new Scanner(System.in).nextLine();
+                    pixKey = inputPixKey();
 
-                    if (pixKey.isEmpty()) {
+                    if (pixKey == null) {
                         System.err.println("Valor vazio!");
                     } else {
                         break;
@@ -1069,7 +1068,7 @@ public class ClientService {
                 System.out.println("Digite o valor que deseja transferir: ");
                 try {
                     double value = new Scanner(System.in).nextDouble();
-                    accountService.withdraw(clientAccountsList.get(0).getAccountNumber(), value);
+                    accountService.withdraw(clientAccount.getAccountNumber(), value);
                     System.out.println(
                             "Transferencia realizada com sucesso!\n"
                                     + "O valor de R$ " + value
@@ -1078,6 +1077,8 @@ public class ClientService {
                     break;
                 } catch (InputMismatchException e) {
                     System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                } catch (InsufficientFundsException e) {
+                    System.out.println(e.getMessage());
                 }
             }
             System.out.println("\nDeseja efetuar outra transferencia PIX?(S/N)");
@@ -1093,9 +1094,9 @@ public class ClientService {
         boolean inputPixKeyMenu = false;
         int inputPixKeyMenuOption = 0;
 
-        while (!inputPixKeyMenu) {
+        while (true) {
             System.out.println("""
-                    Selecione uma opção abaixo:
+                    Selecione uma opção de chave PIX abaixo:
                     1 - CPF
                     2 - CNPJ
                     3 - E-mail
@@ -1120,6 +1121,7 @@ public class ClientService {
                         //if(!CNPJValidator.validateCNPJ(pixKey)){
                         //             System.out.println("Falha ao validar o CNPJ");
                         //}
+                        pixKey = "CNPJ";
                         break;
                     case 3:
                         if (!EmailValidator.validateEmail(pixKey)) {
@@ -1132,12 +1134,15 @@ public class ClientService {
                         }
                         break;
                     case 5:
+                        pixKey = "Chave aleatória";
                         break;
                     case 0:
                         pixKey = null;
-                        inputPixKeyMenu = true;
                         break;
+                    default:
+                        System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
                 }
+                break;
             }
         }
         return pixKey;
@@ -1206,7 +1211,11 @@ public class ClientService {
                                             System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
                                         }
                                     } catch (AccountNotFoundException e) {
-                                        System.out.println(AnsiColors.ANSI_RED + "Conta destino não localizada!" + AnsiColors.ANSI_RESET);
+                                        System.out.println(
+                                                AnsiColors.ANSI_RED
+                                                        + "Conta destino não localizada!"
+                                                        + AnsiColors.ANSI_RESET
+                                        );
                                     } catch (InsufficientFundsException | InvalidValueException e) {
                                         System.out.println(e.getMessage());
                                     }
@@ -1429,15 +1438,6 @@ public class ClientService {
                                         + "\n"
                         );
                     }
-
-                    System.err.println();
-
-                    System.out.println("\nDeseja efetuar outro depósito?(S/N)");
-                    clientOption = validateClientOptionYesOrNo();
-                    if (clientOption != 'S') {
-                        runningDepositMenu = true;
-                    }
-
                 } catch (InputMismatchException e) {
                     System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
                 }
@@ -1510,12 +1510,6 @@ public class ClientService {
 
                     if (accountToCheck == null) {
                         throw new AccountNotFoundException("Conta não está na lista!");
-                    }
-
-                    System.out.println("\nDeseja visualizar o saldo de outra conta?(S/N)");
-                    clientOption = validateClientOptionYesOrNo();
-                    if (clientOption != 'S') {
-                        runningGetClientBalanceMenu = true;
                     }
                 } catch (InputMismatchException e) {
                     System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());

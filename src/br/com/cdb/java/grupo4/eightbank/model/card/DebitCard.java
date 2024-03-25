@@ -23,6 +23,11 @@ public class DebitCard extends Card {
         return true;
     }
 
+    @Override
+    public void updateLimit(double newLimit) {
+
+    }
+
     public void resetDailySpend() {
         dailySpend = 0;
     }
