@@ -614,9 +614,29 @@ public class ClientService {
 
             System.out.println("E qual a forma de pagamento?"
                     + "\n1 - Débito em conta"
-                    + "\2 - Pagar com cartão"
+                    + "\n2 - Pagar com cartão"
                     + "\n0 - Voltar"
             );
+
+            try{
+                int option = new Scanner(System.in).nextInt();
+
+                switch (option){
+                    case 1:
+                        //Métodos pagamento via Conta Bancária
+                        break;
+                    case 2:
+                        //
+                        break;
+                    case 0:
+                        System.out.println("Voltando...");
+                        break;
+                    default:
+                        System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
+                }
+            } catch (InputMismatchException e){
+                System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+            }
         } catch (InputMismatchException e) {
             System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
         }
