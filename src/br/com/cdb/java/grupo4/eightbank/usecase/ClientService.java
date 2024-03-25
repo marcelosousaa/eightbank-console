@@ -566,7 +566,7 @@ public class ClientService {
                         }
                         break;
                     case 5:
-                        cardService.showCardMenu(client);
+                        //cardService.showCardMenu(client);
                         break;
                     case 6:
                         try {
