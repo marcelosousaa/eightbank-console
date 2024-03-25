@@ -1259,7 +1259,7 @@ public class ClientService {
                 switch (inputPixKeyMenuOption) {
                     case 1:
                         if (!CPFValidator.validateCPF(pixKey)) {
-                            System.out.println("Falha ao validar o CPF");
+                            System.err.println("Falha ao validar o CPF");
                         }
                         break;
                     case 2:
@@ -1270,12 +1270,12 @@ public class ClientService {
                         break;
                     case 3:
                         if (!EmailValidator.validateEmail(pixKey)) {
-                            System.out.println("Falha ao validar o E-mail");
+                            System.err.println("Falha ao validar o E-mail");
                         }
                         break;
                     case 4:
                         if (!PhoneNumberValidator.validatePhoneNumber(pixKey)) {
-                            System.out.println("Falha ao validar o CPF");
+                            System.err.println("Falha ao validar o telefone");
                         }
                         break;
                     case 5:
@@ -1285,7 +1285,7 @@ public class ClientService {
                         pixKey = null;
                         break;
                     default:
-                        System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
+                        System.err.println(SystemMessages.INVALID_OPTION.getFieldName());
                 }
                 break;
             }
