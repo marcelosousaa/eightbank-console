@@ -968,7 +968,10 @@ public class ClientService {
                             + "\nSaldo: " + account.getBalance()
             );
             if (account instanceof CurrentAccount) {
-                System.out.println("Taxa mensal: " + ((CurrentAccount) account).getAccountFee() + "\n");
+                System.out.println("Taxa mensal: " + ((CurrentAccount) account).getAccountFee());
+                System.out.println("Proxima cobranca em: " + LocalDate.now());
+                System.out.printf("Valor aproximado cobrado diariamente: R$ %.2f", ((CurrentAccount) account).calculateTaxes());
+                System.out.println("\n");
             } else {
                 System.out.println("Rendimento anual: " + ((SavingsAccount) account).getAnnualPercentageYield());
                 for(int i = 1; i <= 5; i++){
@@ -977,9 +980,6 @@ public class ClientService {
                     );
                     System.out.println("\n");
                 }
-
-
-
             }
         }
 

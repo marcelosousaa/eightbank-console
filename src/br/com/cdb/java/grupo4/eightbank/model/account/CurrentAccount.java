@@ -27,11 +27,6 @@ public class CurrentAccount extends Account implements ITaxable {
     }
 
     @Override
-    public void showTaxes() {
-        System.out.println(calculateTaxes() + "\n");
-    }
-
-    @Override
     public double calculateTaxes() {
         return getAccountFee() / 30;
     }
