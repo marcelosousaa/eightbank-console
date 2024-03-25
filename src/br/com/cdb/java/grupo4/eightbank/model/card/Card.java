@@ -1,35 +1,38 @@
 package br.com.cdb.java.grupo4.eightbank.model.card;
+
 import java.time.LocalDate;
 
 public abstract class Card {
     protected String number;
     protected LocalDate expirationDate;
-    protected int cvv;
     protected String ownerName;
     protected boolean isActive;
+    protected String password;
+    protected String clientCPF;
+    protected String cardType;
+    protected int cvv;
 
-    // Construtor
-    public Card(String number, LocalDate expirationDate, int cvv, String ownerName) {
+    public Card(String number, LocalDate expirationDate, String ownerName, String clientCPF, int cvv) {
         this.number = number;
         this.expirationDate = expirationDate;
-        this.cvv = cvv;
         this.ownerName = ownerName;
-        this.isActive = true; // Cartões são ativados por padrão ao serem criados
+        this.isActive = true; // Cartões são ativados por padrão.
+        this.password = ""; // Senha será definida posteriormente.
+        this.clientCPF = clientCPF;
+        this.cvv = cvv;
     }
 
-    // Método para verificar a validade do cartão
-    public boolean isValid() {
-        return LocalDate.now().isBefore(this.expirationDate) && this.isActive;
+    public abstract boolean makePayment(double amount);
+
+    public void changePassword(String newPassword) {
+        this.password = newPassword;
     }
 
-    // Métodos abstratos que serão implementados pelas subclasses
-    public abstract void makePayment(double amount);
-    public abstract void updateLimit(double newLimit);
-
-    // Método para ativar ou desativar o cartão
     public void setActive(boolean active) {
         this.isActive = active;
     }
+
+    // Getters e setters
 
     // Método para alterar a senha do CVV (Considerando que o CVV pode ser alterado como uma forma de "senha")
     public void changeCVV(int newCVV) {
@@ -55,6 +58,27 @@ public abstract class Card {
 
     public boolean isActive() {
         return isActive;
+    }
+
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getCardType() {
+        return cardType;
+    }
+
+    public String getClientCPF() {
+        return clientCPF;
+    }
+
+    public void setClientCPF(String clientCPF){
+        this.clientCPF = clientCPF;
+    }
+
+    public int getCvv() {
+        return cvv;
     }
 
     // Setters para propriedades que podem necessitar de atualização

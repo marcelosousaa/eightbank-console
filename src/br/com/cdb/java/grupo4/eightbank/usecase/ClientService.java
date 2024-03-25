@@ -1,5 +1,6 @@
 package br.com.cdb.java.grupo4.eightbank.usecase;
 
+import br.com.cdb.java.grupo4.eightbank.dao.CardDAO;
 import br.com.cdb.java.grupo4.eightbank.dao.ClientDAO;
 import br.com.cdb.java.grupo4.eightbank.enuns.AccountType;
 import br.com.cdb.java.grupo4.eightbank.enuns.AnsiColors;
@@ -29,15 +30,21 @@ import java.util.Scanner;
 
 public class ClientService {
     List<Account> clientAccountsList;
-    CardService cardService = new CardService();
-    InsuranceService insuranceService = new InsuranceService();
-    ClientDAO clientDAO = new ClientDAO();
-    AccountService accountService = new AccountService();
-    ClientCategory clientCategory;
+
+    private CardDAO cardDAO = new CardDAO(); // Criação de CardDAO
+    private ClientDAO clientDAO = new ClientDAO(); // Já existente
+    private CardService cardService = new CardService;
+    private InsuranceService insuranceService = new InsuranceService();
+    private AccountService accountService = new AccountService();
+    private ClientCategory clientCategory;
     Client client;
 
-    public boolean clientRegistration()
-            throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidValueException {
+    public ClientService() {
+        // Inicializando CardService com as instâncias necessárias
+        this.cardService = new CardService(cardDAO, clientDAO);
+    }
+
+    public boolean clientRegistration() throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidValueException {
 
         String cpf = inputCPF();
         if (cpf == null) {
@@ -261,11 +268,12 @@ public class ClientService {
         String name;
         while (true) {
             System.out.println("Digite seu nome: ");
+            Scanner scanner = new Scanner(System.in);
             name = new Scanner(System.in).nextLine();
 
             if (!NameValidator.validateName(name)) {
-                System.out.println("O nome digitado não atende aos parametros estabelecidos no sistema."
-                        + "\nPor favor, digite novamente.");
+                System.out.println(SystemMessages.MANDATORY_FIELD_PT_BR.getFieldName());
+
             } else {
                 return name;
             }
@@ -323,7 +331,7 @@ public class ClientService {
                 cpf = new Scanner(System.in).nextLine();
                 if (!CPFValidator.validateCPF(cpf)) {
                     System.out.println("CPF inválido!");
-                } else if (clientDAO.searchClientByCPF(cpf)) {
+                } else if (clientDAO.searchClientByCPF(cpf) != null) {
                     System.err.println("Usuário já existente na base de dados!");
                     cpf = null;
                     break;
@@ -334,7 +342,6 @@ public class ClientService {
                 System.out.println("Caracter(es) inválido(s)!");
             }
         }
-
         return cpf;
     }
 
@@ -566,7 +573,7 @@ public class ClientService {
                         break;
                     case 5:
                         //cardService.showCardMenu(client);
-                        System.out.println("Ainda não implementado\n");
+                        this.cardService.requestCard(client);
                         break;
                     case 6:
                         try {
@@ -574,6 +581,7 @@ public class ClientService {
                         } catch (Exception e) {
                             System.out.println(e.getMessage());
                         }
+
                         break;
                     case 0:
                         System.out.println("Saindo...");

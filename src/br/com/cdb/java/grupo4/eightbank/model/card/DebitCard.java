@@ -6,52 +6,37 @@ public class DebitCard extends Card {
     private double dailyLimit;
     private double dailySpend;
 
-    // Construtor
-    public DebitCard(String number, LocalDate expirationDate, int cvv, String ownerName, double dailyLimit) {
-        super(number, expirationDate, cvv, ownerName);
+
+    public DebitCard(String number, LocalDate expirationDate, int cvv, String ownerName, String clientCPF, double dailyLimit) {
+        super(number, expirationDate, ownerName, clientCPF, cvv);
         this.dailyLimit = dailyLimit;
         this.dailySpend = 0.0;
+        this.cardType = "DEBIT";
     }
 
-    // Implementação do método abstrato makePayment da classe Card
     @Override
-    public void makePayment(double amount) {
-        if (!isValid()) {
-            throw new IllegalStateException("Cartão inválido ou desativado.");
+    public boolean makePayment(double amount) {
+        if (!isActive || (dailySpend + amount) > dailyLimit) {
+            return false; // Pagamento recusado devido a limite diário excedido ou cartão inativo.
         }
-
-        if (amount > (dailyLimit - dailySpend)) {
-            throw new IllegalArgumentException("Limite diário insuficiente para realizar a transação.");
-        }
-
-        // Simula a realização do pagamento, atualizando o gasto diário
         dailySpend += amount;
-        System.out.println("Pagamento de R$ " + amount + " realizado com sucesso.");
+        return true;
     }
 
-    // Implementação do método abstrato updateLimit da classe Card
-    @Override
-    public void updateLimit(double newDailyLimit) {
-        this.dailyLimit = newDailyLimit;
-        System.out.println("Limite diário do cartão de débito atualizado para R$ " + newDailyLimit);
-    }
-
-    // Método para resetar o gasto diário (a ser chamado no início de cada dia)
     public void resetDailySpend() {
-        this.dailySpend = 0.0;
-        System.out.println("Gasto diário no cartão de débito foi zerado.");
+        dailySpend = 0;
     }
 
-    // Getters e Setters específicos
+    // Getters e setters
     public double getDailyLimit() {
         return dailyLimit;
     }
 
-    public double getDailySpend() {
-        return dailySpend;
-    }
-
     public void setDailyLimit(double dailyLimit) {
         this.dailyLimit = dailyLimit;
+    }
+
+    public double getDailySpend() {
+        return dailySpend;
     }
 }
