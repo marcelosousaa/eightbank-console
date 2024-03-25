@@ -22,22 +22,14 @@ public abstract class Card {
         this.cvv = cvv;
     }
 
+    // Métodos abstratos que serão implementados pelas subclasses
     public abstract boolean makePayment(double amount);
 
-
-    // Métodos abstratos que serão implementados pelas subclasses
-    public abstract void makePayment(double amount);
-
     public abstract void updateLimit(double newLimit);
-  
+
     public void changePassword(String newPassword) {
         this.password = newPassword;
     }
-
-    public void setActive(boolean active) {
-        this.isActive = active;
-    }
-
 
     // Getters e setters
 
@@ -52,9 +44,6 @@ public abstract class Card {
     }
 
     // Setters para propriedades que podem necessitar de atualização
-    public void setNumber(String number) {
-        this.number = number;
-    }
 
     public LocalDate getExpirationDate() {
         return expirationDate;
@@ -72,14 +61,9 @@ public abstract class Card {
         return ownerName;
     }
 
-
     public void setOwnerName(String ownerName) {
         this.ownerName = ownerName;
-
-    public boolean isActive() {
-        return isActive;
     }
-
 
     public String getPassword() {
         return password;
@@ -93,13 +77,6 @@ public abstract class Card {
         return clientCPF;
     }
 
-    public void setClientCPF(String clientCPF){
-        this.clientCPF = clientCPF;
-    }
-
-    public int getCvv() {
-        return cvv;
-    }
 
     // Setters para propriedades que podem necessitar de atualização
     public void setNumber(String number) {
@@ -115,3 +92,4 @@ public abstract class Card {
         this.isActive = active;
     }
 }
+

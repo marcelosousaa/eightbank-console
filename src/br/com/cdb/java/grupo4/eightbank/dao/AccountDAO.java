@@ -81,8 +81,6 @@ public class AccountDAO {
         } else {
             throw new InvalidValueException("Valor inválido!");
         }
-        System.out.println("Saque realizado com sucesso!\n"
-                + "Saldo atual - R$ " + balance);
     }
 
     public void depositValue(long accountNumber, double value) throws InvalidValueException, AccountNotFoundException {
