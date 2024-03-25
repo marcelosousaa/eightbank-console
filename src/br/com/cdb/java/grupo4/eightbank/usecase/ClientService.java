@@ -2,10 +2,7 @@ package br.com.cdb.java.grupo4.eightbank.usecase;
 
 import br.com.cdb.java.grupo4.eightbank.dao.CardDAO;
 import br.com.cdb.java.grupo4.eightbank.dao.ClientDAO;
-import br.com.cdb.java.grupo4.eightbank.enuns.AccountType;
-import br.com.cdb.java.grupo4.eightbank.enuns.AnsiColors;
-import br.com.cdb.java.grupo4.eightbank.enuns.ClientCategory;
-import br.com.cdb.java.grupo4.eightbank.enuns.SystemMessages;
+import br.com.cdb.java.grupo4.eightbank.enuns.*;
 import br.com.cdb.java.grupo4.eightbank.exceptions.AccountNotFoundException;
 import br.com.cdb.java.grupo4.eightbank.exceptions.ClientNotFoundException;
 import br.com.cdb.java.grupo4.eightbank.exceptions.InsufficientFundsException;
@@ -13,6 +10,9 @@ import br.com.cdb.java.grupo4.eightbank.exceptions.InvalidValueException;
 import br.com.cdb.java.grupo4.eightbank.model.account.Account;
 import br.com.cdb.java.grupo4.eightbank.model.account.CurrentAccount;
 import br.com.cdb.java.grupo4.eightbank.model.account.SavingsAccount;
+import br.com.cdb.java.grupo4.eightbank.model.card.Card;
+import br.com.cdb.java.grupo4.eightbank.model.card.CreditCard;
+import br.com.cdb.java.grupo4.eightbank.model.card.DebitCard;
 import br.com.cdb.java.grupo4.eightbank.model.client.Address;
 import br.com.cdb.java.grupo4.eightbank.model.client.Client;
 import br.com.cdb.java.grupo4.eightbank.utils.*;
@@ -27,7 +27,8 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
-import java.util.spi.AbstractResourceBundleProvider;
+import java.util.stream.Collectors;
+
 
 public class ClientService {
     List<Account> clientAccountsList;
@@ -635,7 +636,7 @@ public class ClientService {
                                 payUsingAccounts(client, paymentValue);
                                 break;
                             case 2:
-                                //
+                                showCardPaymentOptions(client,paymentValue);
                                 break;
                             case 0:
                                 System.out.println("Voltando...");
@@ -646,6 +647,7 @@ public class ClientService {
                     } catch (InputMismatchException e) {
                         System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
                     }
+
                 }
             } catch (InputMismatchException e) {
                 System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
@@ -734,6 +736,53 @@ public class ClientService {
             if (clientOption != 'S') {
                 runningWithdrawFromAccount = true;
             }
+        }
+    }
+
+    private void showCardPaymentOptions(Client client, double paymentValue) {
+
+
+        System.out.println("Listando seus cartões...");
+        var cards = cardDAO.findCardsByClientCPF(client.getCpf());
+
+        if (cards.isEmpty()) {
+            System.out.println("Nenhum cartão encontrado para este CPF.");
+            return;
+        }
+
+        int index = 1;
+        for (Card card : cards) {
+            System.out.println(index++ + " - Cartão Número: " + card.getNumber() + " - Tipo: " + card.getCardType() + " - Válido até: " + card.getExpirationDate());
+        }
+
+        System.out.println("Digite o número referente ao cartão escolhido:");
+        int cardChoiceIndex = new Scanner(System.in).nextInt();
+        if (cardChoiceIndex < 1 || cardChoiceIndex > cards.size()) {
+            System.out.println("Seleção inválida.");
+            return;
+        }
+
+        Card selectedCard = cards.get(cardChoiceIndex - 1);
+
+        processCardPayment(selectedCard, paymentValue);
+    }
+
+    private void processCardPayment(Card selectedCard, double paymentValue) {
+        if (selectedCard instanceof CreditCard) {
+            // Processamento específico para cartão de crédito
+            System.out.println("Processando pagamento com cartão de crédito...");
+        } else if (selectedCard instanceof DebitCard) {
+            // Processamento específico para cartão de débito
+            System.out.println("Processando pagamento com cartão de débito...");
+        } else {
+            System.out.println("Tipo de cartão não reconhecido.");
+            return;
+        }
+
+        if (selectedCard.makePayment(paymentValue)) {
+            System.out.println("Pagamento de R$" + paymentValue + " efetuado com sucesso no cartão " + selectedCard.getNumber() + ".");
+        } else {
+            System.out.println("Pagamento não realizado. Verifique o limite ou saldo do seu cartão.");
         }
     }
 

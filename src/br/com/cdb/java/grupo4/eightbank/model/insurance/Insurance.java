@@ -9,14 +9,16 @@ public class Insurance {
     private LocalDate issueDate;
     private double policyValue;
     private String policyConditions;
-
     private InsuranceType insuranceType;
+    private String clientCPF;
 
-    public Insurance(LocalDate issueDate, double policyValue, String policyConditions, InsuranceType insuranceType) {
+
+    public Insurance(LocalDate issueDate, double policyValue, String policyConditions, InsuranceType insuranceType, String clientCPF) {
         this.issueDate = issueDate;
         this.policyValue = policyValue;
         this.policyConditions = policyConditions;
         this.insuranceType = insuranceType;
+        this.clientCPF = clientCPF;
     }
 
     public long getPolicyNumber() {
@@ -43,6 +45,11 @@ public class Insurance {
         return insuranceType;
     }
 
+
+    public String getClientCPF() {
+        return clientCPF;
+    }
+  
     @Override
     public String toString() {
         return "Insurance{" +
