@@ -1,12 +1,8 @@
 package br.com.cdb.java.grupo4.eightbank;
 
-import br.com.cdb.java.grupo4.eightbank.exceptions.AccountNotFoundException;
-import br.com.cdb.java.grupo4.eightbank.exceptions.InvalidValueException;
 import br.com.cdb.java.grupo4.eightbank.model.client.Client;
 import br.com.cdb.java.grupo4.eightbank.usecase.ClientService;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 

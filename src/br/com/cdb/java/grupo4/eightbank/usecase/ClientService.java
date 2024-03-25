@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
-import java.util.spi.AbstractResourceBundleProvider;
 
 public class ClientService {
     List<Account> clientAccountsList;
@@ -1756,7 +1755,7 @@ public class ClientService {
 
                             registerClientAccounts(client, 3);
 
-                            // Lista os usuários cadastrados, à partir do método toString
+                            //Lista os usuários cadastrados, à partir do método toString
                             //System.out.println("Clientes\n");
                             //clientDAO.listClients();
 
@@ -1767,6 +1766,7 @@ public class ClientService {
                         reader.close();
                     } catch (IOException e) {
                         System.err.println("Erro ao carregar o arquivo: " + fileName);
+                        break;
                     }
                     System.out.println("Usuários importados com sucesso!");
                     break;
@@ -1774,6 +1774,7 @@ public class ClientService {
             } else {
                 System.err.println("Digite o nome do arquivo!");
             }
+            break;
         }
     }
 }
