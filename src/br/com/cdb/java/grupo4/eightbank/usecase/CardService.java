@@ -7,9 +7,6 @@ import br.com.cdb.java.grupo4.eightbank.model.card.CardFactory;
 
 import br.com.cdb.java.grupo4.eightbank.dao.CardDAO;
 import br.com.cdb.java.grupo4.eightbank.dao.ClientDAO;
-import br.com.cdb.java.grupo4.eightbank.model.card.Card;
-import br.com.cdb.java.grupo4.eightbank.model.card.CardFactory;
-import br.com.cdb.java.grupo4.eightbank.enuns.CardType;
 import br.com.cdb.java.grupo4.eightbank.model.client.Client;
 
 import java.time.LocalDate;
@@ -53,6 +50,7 @@ public class CardService {
             System.out.println("\nEscolha uma opção:");
             System.out.println("1. Solicitar Novo Cartão");
             System.out.println("2. Visualizar Meus Cartões");
+            System.out.println("3. Seguros");
             System.out.println("0. Voltar");
 
             int choice = scanner.nextInt();
@@ -64,6 +62,10 @@ public class CardService {
                     break;
                 case 2:
                     viewMyCards(client);
+                    break;
+                case 3:
+                    InsuranceService insuranceService = new InsuranceService();
+                    insuranceService.showInsuranceMenu(client);
                     break;
                 case 0:
                     running = false;
@@ -108,28 +110,34 @@ public class CardService {
         if (cardTypeChoice == 0) {
             return; // Retorna ao menu anterior
         }
+        switch (cardTypeChoice) {
+            case 1,2:
+                System.out.println("Defina a senha para o novo cartão:");
+                String cardPassword = scanner.nextLine();
 
-        System.out.println("Defina a senha para o novo cartão:");
-        String cardPassword = scanner.nextLine();
+                System.out.println("Digite a senha da sua conta para confirmar a solicitação:");
+                String accountPassword = scanner.nextLine();
 
-        System.out.println("Digite a senha da sua conta para confirmar a solicitação:");
-        String accountPassword = scanner.nextLine();
+                if (!clientDAO.verifyClientPassword(client.getCpf(), accountPassword)) {
+                    System.out.println("Senha da conta incorreta.");
+                    return;
+                }
 
-        if (!clientDAO.verifyClientPassword(client.getCpf(), accountPassword)) {
-            System.out.println("Senha da conta incorreta.");
-            return;
+                CardType cardType = cardTypeChoice == 1 ? CardType.DEBIT : CardType.CREDIT;
+                double limitOrDaily = (cardType == CardType.CREDIT) ? 5000 : 1000;
+
+
+                Card newCard = generateAndSaveCard(cardType, client.getName(), client.getCpf(), limitOrDaily, "password"); // Substituir "password" pela lógica de senha
+                System.out.println("Seu pedido de cartão de " + cardType + " foi confirmado!");
+                System.out.println("Número do Cartão: " + newCard.getNumber());
+                System.out.println("Data de Validade: " + newCard.getExpirationDate());
+                System.out.println("CVV: " + newCard.getCvv());
+                break;
+            default:
+                System.out.println("Opção inválida. Tente novamente.");
+                break;
         }
 
-        CardType cardType = cardTypeChoice == 1 ? CardType.DEBIT : CardType.CREDIT;
-        double limitOrDaily = (cardType == CardType.CREDIT) ? 5000 : 1000;
-
-        // Aqui, a senha já foi verificada anteriormente para entrar nesse fluxo
-        // Simular a criação e salvamento do cartão
-        Card newCard = generateAndSaveCard(cardType, client.getName(), client.getCpf(), limitOrDaily, "password"); // Substituir "password" pela lógica de senha
-        System.out.println("Seu pedido de cartão de " + cardType + " foi confirmado!");
-        System.out.println("Número do Cartão: " + newCard.getNumber());
-        System.out.println("Data de Validade: " + newCard.getExpirationDate());
-        System.out.println("CVV: " + newCard.getCvv());
     }
 
 
