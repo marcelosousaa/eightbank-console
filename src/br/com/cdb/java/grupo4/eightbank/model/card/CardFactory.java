@@ -15,7 +15,14 @@ public class CardFactory {
     private static final Random random = new Random();
     private static final int CARD_NUMBER_LENGTH = 16;
 
-    public static Card createCard(CardType cardType, LocalDate expirationDate, int cvv, String ownerName, String clientCPF, double limitOrDaily) {
+    public static Card createCard(
+            CardType cardType,
+            LocalDate expirationDate,
+            int cvv,
+            String ownerName,
+            String clientCPF,
+            double limitOrDaily
+    ) {
         String number = generateUniqueCardNumber();
         switch (cardType) {
             case CREDIT:

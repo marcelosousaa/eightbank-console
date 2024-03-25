@@ -1,8 +1,9 @@
 package br.com.cdb.java.grupo4.eightbank.model.account;
 
 import br.com.cdb.java.grupo4.eightbank.enuns.AccountType;
+import br.com.cdb.java.grupo4.eightbank.model.interfaces.ITaxable;
 
-public class CurrentAccount extends Account {
+public class CurrentAccount extends Account implements ITaxable {
     private double accountFee;
 
     public CurrentAccount(double balance, String ownerCpf, double accountFee) {
@@ -23,5 +24,10 @@ public class CurrentAccount extends Account {
         return "CurrentAccount{" +
                 "accountFee=" + accountFee +
                 "} " + super.toString();
+    }
+
+    @Override
+    public double calculateTaxes() {
+        return getAccountFee() / 30;
     }
 }

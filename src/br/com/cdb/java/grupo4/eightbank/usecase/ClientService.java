@@ -427,6 +427,7 @@ public class ClientService {
         } else {
             currentAccountMonthlyFee = 0;
         }
+
         return currentAccountMonthlyFee;
     }
 
@@ -534,7 +535,8 @@ public class ClientService {
                             + "\n 3 - Saque"
                             + "\n 4 - Transferencias"
                             + "\n 5 - Cartões" // SUB-MENU SEGUROS
-                            + "\n 6 - Meu cadastro"
+                            + "\n 6 - Pagamentos"
+                            + "\n 7 - Meu cadastro"
                             + "\n 0 - Sair"
             );
 
@@ -543,7 +545,7 @@ public class ClientService {
             try {
                 clientMenuOption = new Scanner(System.in).nextInt();
 
-                if (clientMenuOption < 0 || clientMenuOption > 6) {
+                if (clientMenuOption < 0 || clientMenuOption > 7) {
                     System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
                 }
 
@@ -581,6 +583,9 @@ public class ClientService {
                         this.cardService.requestCard(client);
                         break;
                     case 6:
+                        showPaymentsMenu();
+                        break;
+                    case 7:
                         try {
                             showProfileEditor(client);
                         } catch (Exception e) {
@@ -598,6 +603,43 @@ public class ClientService {
             } catch (InputMismatchException e) {
                 System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
             }
+        }
+    }
+
+    private void showPaymentsMenu() {
+        System.out.println("Qual o valor do pagamento?");
+        double paymentValue = 0d;
+
+        try {
+            paymentValue = new Scanner(System.in).nextDouble();
+
+            System.out.println("E qual a forma de pagamento?"
+                    + "\n1 - Débito em conta"
+                    + "\n2 - Pagar com cartão"
+                    + "\n0 - Voltar"
+            );
+
+            try {
+                int option = new Scanner(System.in).nextInt();
+
+                switch (option) {
+                    case 1:
+                        //Métodos pagamento via Conta Bancária
+                        break;
+                    case 2:
+                        //
+                        break;
+                    case 0:
+                        System.out.println("Voltando...");
+                        break;
+                    default:
+                        System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
+                }
+            } catch (InputMismatchException e) {
+                System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+            }
+        } catch (InputMismatchException e) {
+            System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
         }
     }
 
@@ -926,9 +968,18 @@ public class ClientService {
                             + "\nSaldo: " + account.getBalance()
             );
             if (account instanceof CurrentAccount) {
-                System.out.println("Taxa mensal: " + ((CurrentAccount) account).getAccountFee() + "\n");
+                System.out.println("Taxa mensal: " + ((CurrentAccount) account).getAccountFee());
+                System.out.println("Proxima cobranca em: " + LocalDate.now());
+                System.out.printf("Valor aproximado cobrado diariamente: R$ %.2f", ((CurrentAccount) account).calculateTaxes());
+                System.out.println("\n");
             } else {
-                System.out.println("Rendimento anual: " + ((SavingsAccount) account).getAnnualPercentageYield() + "\n");
+                System.out.println("Rendimento anual: " + ((SavingsAccount) account).getAnnualPercentageYield());
+                for(int i = 1; i <= 5; i++){
+                    System.out.printf(
+                            "Previsão de rendimento em + %d ano(s): R$ %.2f", i, ((SavingsAccount) account).calculateYields(i)
+                    );
+                    System.out.println("\n");
+                }
             }
         }
 

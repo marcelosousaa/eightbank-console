@@ -28,7 +28,7 @@ cep: Deve ser alfanumérico, no formato: XXXXX-XXX
 telefone: Deve ser alfanúmerico, no formato (XX) XXXX(X)-XXXX. Detalhe o 5º digito é opcional
 senha: alfanumérica
 
-Os demais capmpos devem ser de no mínimo 2 caracteres e no máximo 100 caracteres
+Os demais capmpos devem ser de no mínimo 2 caracteres e no máximo 100 caracteres.
 
 ******************************************************************************************************************
 
@@ -60,6 +60,6 @@ cep: It must be alphanumeric and containing hyphen, following the pattern: XXXXX
 phoneNumber: It must be alphanumeric, following the pattern (XX) XXXX(X)-XXXX. The 5th digit, just before hyphen, is optional.
 password: alphanumeric
 
-The other fields must be alphanumeric with at least 2 character and at maximum 100 characters.
+The other fields must be alphanumeric with at least 2 characters and at maximum 100 characters.
 
 
