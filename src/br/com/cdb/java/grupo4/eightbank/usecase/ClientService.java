@@ -337,10 +337,10 @@ public class ClientService {
                 if (!CPFValidator.validateCPF(cpf)) {
                     System.out.println("CPF inválido!");
                 } else if (!clientDAO.searchClientByCPF(cpf)) {
-                    System.err.println("Usuário já existente na base de dados!");
-                    cpf = null;
                     break;
                 } else {
+                    System.err.println("Usuário já existente na base de dados!");
+                    cpf = null;
                     break;
                 }
             } catch (InputMismatchException e) {
