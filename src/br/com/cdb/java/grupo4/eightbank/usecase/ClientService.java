@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
-import java.util.spi.AbstractResourceBundleProvider;
 
 public class ClientService {
     List<Account> clientAccountsList;
@@ -567,6 +566,7 @@ public class ClientService {
                         break;
                     case 5:
                         //cardService.showCardMenu(client);
+                        System.out.println("Ainda não implementado\n");
                         break;
                     case 6:
                         try {
