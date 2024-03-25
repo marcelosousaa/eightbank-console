@@ -44,6 +44,7 @@ public class EightbankConsoleApplication {
                             while(!runningLoginMenu){
                                 if (clientService.clientRegistration()) {
                                     System.out.println("Cadastro realizado com sucesso!");
+                                    runningLoginMenu = true;
                                 } else {
                                     System.out.println("Houve um problema no cadastro. Vamos repetir?(S/N)");
                                     try {

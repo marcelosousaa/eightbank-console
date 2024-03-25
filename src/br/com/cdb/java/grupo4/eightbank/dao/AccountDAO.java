@@ -49,28 +49,12 @@ public class AccountDAO {
         if (account == null) {
             throw new AccountNotFoundException("\n"
                     + AnsiColors.ANSI_RED.getAnsiColorCode()
-                    + "Conta não está na lista!"
+                    + "Conta não localizada!"
                     + AnsiColors.ANSI_RESET.getAnsiColorCode()
                     + "\n");
         } else {
             return account;
         }
-    }
-
-    public List<Account> findAccountByClientCPF(String cpf) throws AccountNotFoundException {
-        List<Account> clientAccounts = new ArrayList<>();
-
-        for (Account a : this.accountList) {
-            if (a.getOwnerCPF().equals(cpf)) {
-                clientAccounts.add(a);
-            }
-        }
-
-        if (clientAccounts.isEmpty()) {
-            throw new AccountNotFoundException("Não foram localizadas contas para este CPF!");
-        }
-
-        return clientAccounts;
     }
 
     public void withdrawValue(long accountNumber, double value)
@@ -104,7 +88,6 @@ public class AccountDAO {
 
     public void depositValue(long accountNumber, double value) throws InvalidValueException, AccountNotFoundException {
         boolean validateAccountSearch = false;
-        double balance = 0;
         if (value > 0) {
             for (Account a : this.accountList) {
                 if (a.getAccountNumber() != accountNumber) {
@@ -112,19 +95,23 @@ public class AccountDAO {
                 } else {
                     validateAccountSearch = true;
                     a.setBalance(a.getBalance() + value);
-                    balance = a.getBalance();
                     break;
                 }
             }
         } else {
-            throw new InvalidValueException(SystemMessages.INVALID_VALUE.getFieldName());
+            throw new InvalidValueException(
+                    AnsiColors.ANSI_RED.getAnsiColorCode()
+                            + SystemMessages.INVALID_VALUE.getFieldName()
+                            + AnsiColors.ANSI_RESET.getAnsiColorCode()
+            );
         }
 
         if (!validateAccountSearch) {
-            throw new AccountNotFoundException("Conta não localizada!");
-        } else {
-            System.out.println("Depósito realizado com sucesso!\n"
-                    + "Saldo atual - R$ " + balance);
+            throw new AccountNotFoundException(
+                    AnsiColors.ANSI_RED.getAnsiColorCode()
+                            + "Conta não localizada!"
+                            + AnsiColors.ANSI_RESET.getAnsiColorCode()
+            );
         }
     }
 
@@ -140,7 +127,7 @@ public class AccountDAO {
                 break;
             }
         }
-        if(!validateAccountSearch){
+        if (!validateAccountSearch) {
             throw new AccountNotFoundException("Conta não localizada!");
         } else {
             return balance;
