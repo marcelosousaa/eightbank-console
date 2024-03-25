@@ -15,35 +15,26 @@ import java.util.List;
 public class AccountService {
     AccountDAO accountDAO = new AccountDAO();
 
-    public Account createCurrentAccount(Client client, double accountFee) {
+    public Account createCurrentAccount(String ownerCpf, double accountFee) {
         double balance = 0;
-        Account currentAccount = new CurrentAccount(balance, client, accountFee);
+        Account currentAccount = new CurrentAccount(balance, ownerCpf, accountFee);
         accountDAO.addAccount(currentAccount);
         return currentAccount;
     }
 
-    public Account createSavingsAccount(Client client, double annualPercentageYield) {
+    public Account createSavingsAccount(String ownerCpf, double annualPercentageYield) {
         double balance = 0;
-        Account savingsAccount = new SavingsAccount(balance, client, annualPercentageYield);
+        Account savingsAccount = new SavingsAccount(balance, ownerCpf, annualPercentageYield);
         accountDAO.addAccount(savingsAccount);
         return savingsAccount;
     }
 
-    public void setAccountOwner(Account account, Client client) {
-        accountDAO.setAccountOwner(account, client);
-    }
-
-    public void checkBalance(long accountNumber)   {
-        try{
-            accountDAO.checkBalance(accountNumber);
-        } catch (AccountNotFoundException e){
-            System.out.println(e.getMessage());
-        }
+    public void setAccountOwner(Account account, String cpf) {
+        accountDAO.setAccountOwner(account, cpf);
     }
 
     public void withdraw(long accountNumber, double value) throws InsufficientFundsException, InvalidValueException, AccountNotFoundException {
         accountDAO.withdrawValue(accountNumber, value);
-        checkBalance(accountNumber);
     }
 
     public void deposit(long accountNumber, double value)  {
@@ -52,11 +43,9 @@ public class AccountService {
         } catch (AccountNotFoundException | InvalidValueException e){
             System.out.println(e.getMessage());
         }
-
-
     }
 
-    public void transfer(long originAccountNumber, long targetAccountNumber, double value) {
+    public void transferSameBank(long originAccountNumber, long targetAccountNumber, double value) {
         try {
             accountDAO.withdrawValue(originAccountNumber, value);
             try {
@@ -83,5 +72,9 @@ public class AccountService {
 
     public List<Account> findAccountsByCPF(String cpf) throws AccountNotFoundException {
         return accountDAO.searchAccountByCpf(cpf);
+    }
+
+    public Account findAccountByNumber(long accountNumber) throws AccountNotFoundException {
+        return accountDAO.findAccountByNumber(accountNumber);
     }
 }

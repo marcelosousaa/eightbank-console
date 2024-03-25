@@ -16,41 +16,54 @@ public class EightbankConsoleApplication {
         Client client;
         ClientService clientService = new ClientService();
 
+        clientService.importClientsFromFile("clients.csv");
+
         while (true) {
-            int menuOption = 0;
-            System.out.println("\n######### Bem-vindo ao EightBank #########");
-            System.out.println("\nSelecione uma opção abaixo:\n "
-                    + "\n1 - Conheça nossos benefícios e cadastre-se!"
-                    + "\n2 - Acesso à conta"
-                    + "\n0 - Sair");
+            int menuOption;
+            System.out.println(
+                    """
+
+                            ######### Bem-vindo ao EightBank #########
+
+                            Selecione uma opção abaixo:
+                            \s
+                            1 - Cadastre-se
+                            2 - Acesso à conta
+                            0 - Sair"""
+            );
             try {
+
                 menuOption = new Scanner(System.in).nextInt();
                 if (menuOption < 0 || menuOption > 2) {
                     System.out.println("Opção inválida!");
                 } else {
                     switch (menuOption) {
                         case 1:
-                            if (clientService.clientRegistration()) {
-                                System.out.println("Cadastro realizado com sucesso!");
-                            } else {
-                                System.out.println("Houve um problema no cadastro. Vamos repetir?(S/N)");
-                                try {
-                                    char option = new Scanner(System.in).next().charAt(0);
-                                    if (option == 'N' || option == 'n') {
-                                        System.out.println("Encerrando...\n"
-                                                + "Obrigado por utilizar nosso sistema.");
-                                        System.exit(0);
-                                    } else {
-                                        break;
+                            boolean runningLoginMenu = false;
+
+                            while(!runningLoginMenu){
+                                if (clientService.clientRegistration()) {
+                                    System.out.println("Cadastro realizado com sucesso!");
+                                    runningLoginMenu = true;
+                                } else {
+                                    System.out.println("Houve um problema no cadastro. Vamos repetir?(S/N)");
+                                    try {
+                                        char option = new Scanner(System.in).next().charAt(0);
+                                        if (option == 'N' || option == 'n') {
+                                            System.out.println("Retornando ao menu...\n");
+                                            runningLoginMenu = true;
+                                        }
+                                    } catch (InputMismatchException e) {
+                                        System.out.println("Caracter inválido!");
                                     }
-                                } catch (InputMismatchException e) {
-                                    System.out.println("Caracter inválido!");
                                 }
                             }
                             break;
                         case 2:
                             client = clientService.login();
-                            clientService.clientMenu(client);
+                            if(client != null){
+                                clientService.clientMenu(client);
+                            }
                             break;
                         case 0:
                             System.out.println("Encerrando...\n"

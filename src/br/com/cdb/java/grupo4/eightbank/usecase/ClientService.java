@@ -3,15 +3,23 @@ package br.com.cdb.java.grupo4.eightbank.usecase;
 import br.com.cdb.java.grupo4.eightbank.dao.CardDAO;
 import br.com.cdb.java.grupo4.eightbank.dao.ClientDAO;
 import br.com.cdb.java.grupo4.eightbank.enuns.AccountType;
+import br.com.cdb.java.grupo4.eightbank.enuns.AnsiColors;
 import br.com.cdb.java.grupo4.eightbank.enuns.ClientCategory;
 import br.com.cdb.java.grupo4.eightbank.enuns.SystemMessages;
 import br.com.cdb.java.grupo4.eightbank.exceptions.AccountNotFoundException;
+import br.com.cdb.java.grupo4.eightbank.exceptions.ClientNotFoundException;
+import br.com.cdb.java.grupo4.eightbank.exceptions.InsufficientFundsException;
 import br.com.cdb.java.grupo4.eightbank.exceptions.InvalidValueException;
 import br.com.cdb.java.grupo4.eightbank.model.account.Account;
+import br.com.cdb.java.grupo4.eightbank.model.account.CurrentAccount;
+import br.com.cdb.java.grupo4.eightbank.model.account.SavingsAccount;
 import br.com.cdb.java.grupo4.eightbank.model.client.Address;
 import br.com.cdb.java.grupo4.eightbank.model.client.Client;
 import br.com.cdb.java.grupo4.eightbank.utils.*;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDate;
@@ -22,12 +30,14 @@ import java.util.Scanner;
 
 public class ClientService {
     List<Account> clientAccountsList;
+
     private CardDAO cardDAO = new CardDAO(); // Criação de CardDAO
     private ClientDAO clientDAO = new ClientDAO(); // Já existente
-    private CardService cardService;
+    private CardService cardService = new CardService;
     private InsuranceService insuranceService = new InsuranceService();
     private AccountService accountService = new AccountService();
     private ClientCategory clientCategory;
+    Client client;
 
     public ClientService() {
         // Inicializando CardService com as instâncias necessárias
@@ -37,6 +47,10 @@ public class ClientService {
     public boolean clientRegistration() throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidValueException {
 
         String cpf = inputCPF();
+        if (cpf == null) {
+            return false;
+        }
+
         double grossMonthlyIncome = inputGrossMonthlyIncome();
         String email = inputEmail();
         String name = inputName();
@@ -45,7 +59,7 @@ public class ClientService {
         String phoneNumber = inputPhoneNumber();
         String passwordString = inputPassword();
 
-        Client client = new Client(
+        client = new Client(
                 email,
                 passwordString,
                 name,
@@ -60,21 +74,30 @@ public class ClientService {
         //Adiciona usuario ao "banco de dados" de clientes
         clientDAO.addClient(client);
 
+        //Cria e registra a conta selecionada
+        registerClientAccounts(client);
+
+        return true;
+    }
+
+    private void registerClientAccounts(Client client) {
         // Cria a(s) conta(s) do cliente e devolve para um ArrayList
         List<Account> clientAccountsList = clientAccountsRegistration(client);
 
         //Itera no array retornado e seta o Cliente como owner das contas
         for (Account account : clientAccountsList) {
-            accountService.setAccountOwner(account, client);
+            accountService.setAccountOwner(account, client.getCpf());
         }
+    }
 
-        // Lista os usuários cadastrados, à partir do método toString
-        clientDAO.listClients();
+    private void registerClientAccounts(Client client, int accountsTypeOtion) {
+        // Cria a(s) conta(s) do cliente e devolve para um ArrayList
+        List<Account> clientAccountsList = clientAccountsRegistration(client, accountsTypeOtion);
 
-        //Listar contas e titulares
-        accountService.listAccounts();
-
-        return true;
+        //Itera no array retornado e seta o Cliente como owner das contas
+        for (Account account : clientAccountsList) {
+            accountService.setAccountOwner(account, client.getCpf());
+        }
     }
 
     private String inputPassword() throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -183,7 +206,15 @@ public class ClientService {
             }
         }
 
-        return new Address(streetName, number, district, city, state, zipCode);
+        System.out.println("Se o endereço possui complemento, digite abaixo, por favor. Enter para continuar.");
+        String addressComplement;
+        addressComplement = new Scanner(System.in).nextLine();
+
+        if (addressComplement.isEmpty()) {
+            return new Address(streetName, number, district, city, state, zipCode);
+        } else {
+            return new Address(streetName, number, district, city, state, zipCode, addressComplement);
+        }
     }
 
     private LocalDate inputDateOfBirth() {
@@ -242,11 +273,11 @@ public class ClientService {
 
             if (!NameValidator.validateName(name)) {
                 System.out.println(SystemMessages.MANDATORY_FIELD_PT_BR.getFieldName());
+
             } else {
-                break;
+                return name;
             }
         }
-        return name;
     }
 
     private String inputEmail() {
@@ -302,6 +333,8 @@ public class ClientService {
                     System.out.println("CPF inválido!");
                 } else if (clientDAO.searchClientByCPF(cpf) != null) {
                     System.err.println("Usuário já existente na base de dados!");
+                    cpf = null;
+                    break;
                 } else {
                     break;
                 }
@@ -331,20 +364,50 @@ public class ClientService {
                 if (accountTypeOption < 1 || accountTypeOption > 3) {
                     System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
                 } else if (accountTypeOption == 1) {
-                    account = accountService.createSavingsAccount(client, annualPercentageYield);
+                    account = accountService.createSavingsAccount(client.getCpf(), annualPercentageYield);
                     accountList.add(account);
                 } else if (accountTypeOption == 2) {
-                    account = accountService.createCurrentAccount(client, currentAccountMonthlyFee);
+                    account = accountService.createCurrentAccount(client.getCpf(), currentAccountMonthlyFee);
                     accountList.add(account);
                 } else {
-                    account = accountService.createSavingsAccount(client, annualPercentageYield);
+                    account = accountService.createSavingsAccount(client.getCpf(), annualPercentageYield);
                     accountList.add(account);
-                    account = accountService.createCurrentAccount(client, currentAccountMonthlyFee);
+                    account = accountService.createCurrentAccount(client.getCpf(), currentAccountMonthlyFee);
                     accountList.add(account);
                 }
                 break;
             } catch (InputMismatchException e) {
-                System.out.println(SystemMessages.INVALID_CARACTER.getFieldName());
+                System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+            }
+        }
+        return accountList;
+    }
+
+    private List<Account> clientAccountsRegistration(Client client, int accountsType) {
+        Account account;
+        List<Account> accountList = new ArrayList<>();
+        double annualPercentageYield = checkAnnualPercentageYield(client);
+        double currentAccountMonthlyFee = checkCurrentAccountMonthlyFee(client);
+
+        while (true) {
+            try {
+                if (accountsType < 1 || accountsType > 3) {
+                    System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
+                } else if (accountsType == 1) {
+                    account = accountService.createSavingsAccount(client.getCpf(), annualPercentageYield);
+                    accountList.add(account);
+                } else if (accountsType == 2) {
+                    account = accountService.createCurrentAccount(client.getCpf(), currentAccountMonthlyFee);
+                    accountList.add(account);
+                } else {
+                    account = accountService.createSavingsAccount(client.getCpf(), annualPercentageYield);
+                    accountList.add(account);
+                    account = accountService.createCurrentAccount(client.getCpf(), currentAccountMonthlyFee);
+                    accountList.add(account);
+                }
+                break;
+            } catch (InputMismatchException e) {
+                System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
             }
         }
         return accountList;
@@ -421,43 +484,63 @@ public class ClientService {
             try {
                 client = clientDAO.searchClientByEmail(email);
                 try {
-                    PasswordService.validatePassword(passwordString, client.getPassword());
+                    if (!PasswordService.validatePassword(passwordString, client.getPassword())) {
+                        client = null;
+                    }
                 } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-                    System.out.println("Senha inválida!");
                     client = null;
                 }
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                client = null;
             }
 
             if (client != null) {
-                System.out.println("\nLogin realizado com sucesso!\n" + "Bem-vindo " + client.getName() + "!");
+                System.out.println("\nLogin realizado com sucesso!\n\n" + "Bem-vindo, " + client.getName() + "!");
             } else {
                 System.out.println(
                         "\nNao foi possivel realizar o login, verifique seus dados e tente novamente.\n");
+                break;
             }
         }
         return client;
+    }
+
+    private int validateClientOptionNumber() {
+        int clientOption;
+
+        while (true) {
+            try {
+                clientOption = new Scanner(System.in).nextInt();
+                return clientOption;
+            } catch (InputMismatchException e) {
+                System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+            }
+        }
     }
 
     public void clientMenu(Client client) {
         boolean runningClientMenu = false;
 
         while (!runningClientMenu) {
-            System.out.println("Selecione uma opcao abaixo: "
-                    + "\n 1 - Saldo"
-                    + "\n 2 - Depósito"
-                    + "\n 3 - Saque"
-                    + "\n 4 - Transferencias"
-                    + "\n 5 - Cartões"
-                    + "\n 6 - Meu cadastro"
-                    + "\n 0 - Sair"
+            System.out.println(
+                    "Selecione uma opção abaixo: "
+                            + "\n 1 - Saldo"
+                            + "\n 2 - Depósito"
+                            + "\n 3 - Saque"
+                            + "\n 4 - Transferencias"
+                            + "\n 5 - Cartões" // SUB-MENU SEGUROS
+                            + "\n 6 - Meu cadastro"
+                            + "\n 0 - Sair"
             );
 
             int clientMenuOption = 0;
 
             try {
                 clientMenuOption = new Scanner(System.in).nextInt();
+
+                if (clientMenuOption < 0 || clientMenuOption > 6) {
+                    System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
+                }
 
                 switch (clientMenuOption) {
                     case 1:
@@ -474,16 +557,813 @@ public class ClientService {
                             System.out.println(e.getMessage());
                         }
                         break;
+                    case 3:
+                        try {
+                            withdrawFromAccount(client);
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                        }
+                        break;
+                    case 4:
+                        try {
+                            showTransferMenu(client);
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                        }
+                        break;
                     case 5:
+                        //cardService.showCardMenu(client);
                         this.cardService.requestCard(client);
                         break;
+                    case 6:
+                        try {
+                            showProfileEditor(client);
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                        }
+
+                        break;
                     case 0:
+                        System.out.println("Saindo...");
                         runningClientMenu = true;
+                        break;
                     default:
                         System.err.println(SystemMessages.INVALID_OPTION.getFieldName());
                 }
             } catch (InputMismatchException e) {
-                System.err.println(SystemMessages.INVALID_CARACTER.getFieldName());
+                System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+            }
+        }
+    }
+
+    private void showProfileEditor(Client client)
+            throws ClientNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, AccountNotFoundException {
+        showClientProfile(client);
+
+        boolean runningProfileEditMenu = false;
+        while (!runningProfileEditMenu) {
+            System.out.println("Deseja atualizar alguma informação do perfil(S/N)?");
+            char clientOption = validateClientOptionYesOrNo();
+
+            if (clientOption == 'S') {
+                System.out.println(
+                        "Selecione uma opção no menu abaixo para atualizar:"
+                                + "\n 1 - Nome"
+                                + "\n 2 - E-mail"
+                                + "\n 3 - Senha"
+                                + "\n 4 - Telefone"
+                                + "\n 5 - Renda"
+                                + "\n 6 - Endereço"
+                                + "\n 0 - Sair"
+                );
+                try {
+                    int profileEditMenuOption = new Scanner(System.in).nextInt();
+                    switch (profileEditMenuOption) {
+                        case 1:
+                            updateProfileField(client, "nome");
+                            break;
+                        case 2:
+                            updateProfileField(client, "email");
+                            break;
+                        case 3:
+                            updateProfileField(client, "senha");
+                            break;
+                        case 4:
+                            updateProfileField(client, "telefone");
+                            break;
+                        case 5:
+                            updateProfileField(client, "renda");
+                            break;
+                        case 6:
+                            updateProfileField(client, "endereço");
+                            break;
+                        case 0:
+                            System.out.println("Saindo...");
+                            runningProfileEditMenu = true;
+                            break;
+                        default:
+                            System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
+                    }
+                } catch (InputMismatchException e) {
+                    System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
+                }
+            } else {
+                runningProfileEditMenu = true;
+            }
+        }
+        showClientProfile(client);
+    }
+
+    private void updateProfileField(Client client, String field) throws ClientNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
+        switch (field) {
+            case "nome":
+                while (true) {
+                    System.out.println("Certo, como gostaria de ser chamado à partir de agora?");
+                    String newProfileName = new Scanner(System.in).nextLine();
+
+                    if (newProfileName.isEmpty()) {
+                        System.out.println("Novo campo nome está vazio! Deseja prosseguir mesmo assim?(S/N)");
+                        char option = validateClientOptionYesOrNo();
+                        if (option == 'S') {
+                            clientDAO.updateClientProfileName(client, newProfileName);
+                            break;
+                        }
+                    } else {
+                        clientDAO.updateClientProfileName(client, newProfileName);
+                        break;
+                    }
+
+                    break;
+                }
+                break;
+
+            case "email":
+                while (true) {
+                    System.out.println("Certo, qual seu novo email?");
+                    String newProfileEmail = new Scanner(System.in).nextLine();
+
+                    if (newProfileEmail.isEmpty()) {
+                        System.err.println("Novo e-mail não pode estar vazio!");
+                    } else {
+                        clientDAO.updateClientProfileEmail(client, newProfileEmail);
+                        break;
+                    }
+                }
+                break;
+
+            case "senha":
+                while (true) {
+                    System.out.println("Certo, qual sua nova senha?");
+                    String newPassword = new Scanner(System.in).nextLine();
+
+                    if (newPassword.isEmpty()) {
+                        System.err.println("Senha não pode ser vazia!");
+                    } else {
+                        newPassword = PasswordService.generateStrongPassword(newPassword);
+                        clientDAO.updateClientProfilePassword(client, newPassword);
+                        break;
+                    }
+                }
+                break;
+
+            case "telefone":
+                while (true) {
+                    System.out.println("Certo, qual seu novo telefone?");
+                    String newPhoneNumber = new Scanner(System.in).nextLine();
+
+                    if (newPhoneNumber.isEmpty()) {
+                        System.err.println("Telefone não pode ser vazio!");
+                    } else {
+                        if (!PhoneNumberValidator.validatePhoneNumber(newPhoneNumber)) {
+                            System.out.println(SystemMessages.INVALID_FORMAT.getFieldName());
+                        } else {
+                            clientDAO.updateClientProfilePhoneNumber(client, newPhoneNumber);
+                        }
+                        break;
+                    }
+                }
+                break;
+
+            case "renda":
+                while (true) {
+                    System.out.println("Certo, qual sua nova renda?");
+                    String newGrossMonthlyIncome = new Scanner(System.in).nextLine();
+
+                    if (newGrossMonthlyIncome.isEmpty()) {
+                        System.err.println("Telefone não pode ser vazio!");
+                    } else {
+                        try {
+                            double value = Double.parseDouble(newGrossMonthlyIncome);
+                            clientDAO.updateClientProfileGrossMonthlyIncome(client, value);
+                            break;
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                break;
+
+            case "endereço":
+                updateProfileAddress(client);
+                break;
+
+            default:
+                SystemMessages.INVALID_OPTION.getFieldName();
+        }
+
+
+    }
+
+    private void updateProfileAddress(Client client) throws ClientNotFoundException {
+        boolean runningUpdateProfileAddressMenu = false;
+        while (!runningUpdateProfileAddressMenu) {
+            System.out.println("Selecione a informação que deseja atualizar: "
+                    + "\n1 - Nome do Endereço"
+                    + "\n2 - Número do Endereço"
+                    + "\n3 - Bairro"
+                    + "\n4 - Cidade"
+                    + "\n5 - Estado"
+                    + "\n6 - CEP"
+                    + "\n7 - Complemento"
+                    + "\n0 - Voltar");
+
+            try {
+                int option = new Scanner(System.in).nextInt();
+                switch (option) {
+                    case 1:
+                        while (true) {
+                            System.out.println("Certo, qual o nome da rua?");
+                            String newStreetName = new Scanner(System.in).nextLine();
+                            if (newStreetName.isEmpty()) {
+                                System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
+                            } else {
+                                clientDAO.updateClientProfileAddressStreetName(client, newStreetName);
+                                break;
+                            }
+                        }
+                        break;
+                    case 2:
+                        while (true) {
+                            System.out.println("Certo, qual o número");
+                            String newNumber = new Scanner(System.in).nextLine();
+                            if (newNumber.isEmpty()) {
+                                System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
+                            } else {
+                                try {
+                                    long newNumberConverted = Long.parseLong(newNumber);
+                                    clientDAO.updateClientProfileAddressNumber(client, newNumberConverted);
+                                    break;
+                                } catch (Exception e) {
+                                    System.out.println(e.getMessage());
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                        break;
+                    case 3:
+                        while (true) {
+                            System.out.println("Certo, qual o Bairro?");
+                            String newDistrictName = new Scanner(System.in).nextLine();
+                            if (newDistrictName.isEmpty()) {
+                                System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
+                            } else {
+                                clientDAO.updateClientProfileAddressDistrictName(client, newDistrictName);
+                                break;
+                            }
+                        }
+                        break;
+                    case 4:
+                        while (true) {
+                            System.out.println("Certo, qual a cidade?");
+                            String newCityName = new Scanner(System.in).nextLine();
+                            if (newCityName.isEmpty()) {
+                                System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
+                            } else {
+                                clientDAO.updateClientProfileAddressCityName(client, newCityName);
+                                break;
+                            }
+                        }
+                        break;
+                    case 5:
+                        while (true) {
+                            System.out.println("Certo, qual o estado?");
+                            String newStateName = new Scanner(System.in).nextLine();
+                            if (newStateName.isEmpty()) {
+                                System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
+                            } else {
+                                clientDAO.updateClientProfileAddressStateName(client, newStateName);
+                                break;
+                            }
+                        }
+                        break;
+                    case 6:
+                        while (true) {
+                            System.out.println("Certo, qual o CEP?");
+                            String newZipCode = new Scanner(System.in).nextLine();
+                            if (newZipCode.isEmpty()) {
+                                System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
+                            } else {
+                                if (!ZipCodeValidator.validateZipCode(newZipCode)) {
+                                    System.out.println(SystemMessages.INVALID_ZIP_CODE.getFieldName());
+                                } else {
+                                    clientDAO.updateClientProfileAddressCep(client, newZipCode);
+                                    break;
+                                }
+                            }
+                        }
+                        break;
+                    case 7:
+                        while (true) {
+                            System.out.println("Certo, qual o complemento?");
+                            String newAddressComplement = new Scanner(System.in).nextLine();
+                            if (newAddressComplement.isEmpty()) {
+                                System.out.println(SystemMessages.WARNING_EMPTY_OR_NULL_FIELD.getFieldName());
+                            } else {
+                                clientDAO.updateClientProfileAddressComplement(client, newAddressComplement);
+                                break;
+                            }
+                        }
+                        break;
+                    case 0:
+                        System.out.println("Saindo...");
+                        runningUpdateProfileAddressMenu = true;
+                        break;
+                    default:
+                        System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
+                }
+            } catch (InputMismatchException e) {
+                System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+            }
+        }
+    }
+
+    private void showClientProfile(Client client) throws AccountNotFoundException {
+        System.out.println("Bem vindo ao seu perfil. "
+                + "Aqui você pode conferir os seus dados\n");
+
+        // DADOS PESSOAIS
+        System.out.println(
+                "CPF: " + client.getCpf()
+                        + "\nNome: " + client.getName()
+                        + "\nData de Nascimento: " + client.getDateOfBirth()
+                        + "\nTelefone: " + client.getPhoneNumber()
+                        + "\nE-mail: " + client.getEmail()
+                        + "\nSenha: **********"
+                        + "\nCategoria: " + client.getClientCategory()
+                        + "\nRenda Informada: R$" + client.getGrossMonthlyIncome() + "\n"
+        );
+
+        // ENDEREÇO
+        System.out.println("Endereço\n"
+                + "=============================="
+                + "\nRua: " + client.getAddress().getStreetName() + ", " + client.getAddress().getNumber()
+                + "\nBairro: " + client.getAddress().getDistrict()
+                + "\nCidade: " + client.getAddress().getCity()
+                + "\nEstado: " + client.getAddress().getState()
+                + "\nCEP: " + client.getAddress().getZipCode()
+        );
+        if (client.getAddress().getAddressComplement() == null) {
+            System.out.println("Complemento: Não informado.\n");
+        } else {
+            System.out.println("Complemento: " + client.getAddress().getAddressComplement() + "\n");
+        }
+
+        //CONTAS
+        clientAccountsList = accountService.findAccountsByCPF(client.getCpf());
+
+        System.out.println("Contas encontradas: \n");
+
+        for (Account account : clientAccountsList) {
+            System.out.println(
+                    "Número da conta: " + account.getAccountNumber()
+                            + "\nTipo da Conta: " + account.getAccountType().getAccountTypeName()
+                            + "\nSaldo: " + account.getBalance()
+            );
+            if (account instanceof CurrentAccount) {
+                System.out.println("Taxa mensal: " + ((CurrentAccount) account).getAccountFee() + "\n");
+            } else {
+                System.out.println("Rendimento anual: " + ((SavingsAccount) account).getAnnualPercentageYield() + "\n");
+            }
+        }
+
+
+        //CARTÕES
+
+
+        //SEGUROS
+
+
+    }
+
+    private void showTransferMenu(Client client) throws AccountNotFoundException, InvalidValueException, InsufficientFundsException {
+        boolean runningTransferMenu = false;
+        int transferMenuOption = 0;
+
+        while (!runningTransferMenu) {
+            System.out.println("\nBem vindo ao menu de transferencias!"
+                    + "\nSelecione uma opção no menu abaixo:"
+                    + "\n1 - Transferencia para outro cliente Eightbank"
+                    + "\n2 - Pix"
+                    + "\n0 - Voltar");
+
+            try {
+                transferMenuOption = new Scanner(System.in).nextInt();
+
+                if (transferMenuOption == 0) {
+                    System.out.println("Voltando...");
+                    break;
+                }
+
+                if (transferMenuOption < 0 || transferMenuOption > 2) {
+                    System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
+                } else {
+                    switch (transferMenuOption) {
+                        case 1:
+                            transferToSameBank(client);
+                            break;
+                        case 2:
+                            transferPix(client);
+                            break;
+                        case 0:
+                            System.out.println("Voltando...");
+                            runningTransferMenu = true;
+                            break;
+                        default:
+                            System.err.println(SystemMessages.INVALID_OPTION.getFieldName());
+                    }
+                }
+            } catch (InputMismatchException e) {
+                System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
+            }
+        }
+    }
+
+    private void transferPix(Client client)
+            throws AccountNotFoundException, InvalidValueException, InsufficientFundsException {
+        clientAccountsList = accountService.findAccountsByCPF(client.getCpf());
+
+        boolean runningTransferMenu = false;
+        char clientOption = ' ';
+        String pixKey;
+
+        while (!runningTransferMenu) {
+            if (clientAccountsList.size() > 1) {
+                System.out.println("\nVimos aqui que você possui mais de uma conta conosco.\n");
+
+                System.out.println("Número da Conta - Tipo da Conta");
+                for (Account account : clientAccountsList) {
+                    System.out.println(" - " + account.getAccountNumber()
+                            + " - " + account.getAccountType().getAccountTypeName());
+                }
+
+                System.out.println("\nPor favor digite o numero da conta que deseja utlizar: ");
+
+                try {
+                    long senderAccountNumber = new Scanner(System.in).nextLong();
+                    Account senderAccount = null;
+                    for (Account account : clientAccountsList) {
+                        if (account.getAccountNumber() != senderAccountNumber) {
+                            System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
+                        } else {
+                            senderAccount = account;
+
+                            //System.out.println("Digite a chave PIX: ");
+
+                            pixKey = inputPixKey();
+                            try {
+                                pixKey = new Scanner(System.in).nextLine();
+
+                                System.out.println("Digite o valor que deseja transferir: ");
+                                try {
+                                    double value = new Scanner(System.in).nextDouble();
+                                    accountService.withdraw(senderAccount.getAccountNumber(), value);
+                                    System.out.println(
+                                            "Transferencia realizada com sucesso!\n"
+                                                    + "O valor de R$ " + value
+                                                    + "foi transferido para o PIX: " + pixKey
+                                    );
+                                    break;
+                                } catch (InputMismatchException e) {
+                                    System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                                }
+                            } catch (InputMismatchException e) {
+                                System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                            }
+                        }
+                    }
+
+                    if (senderAccount == null) {
+                        throw new AccountNotFoundException(
+                                "\n"
+                                        + AnsiColors.ANSI_RED.getAnsiColorCode()
+                                        + "Conta não está na lista!"
+                                        + AnsiColors.ANSI_RESET.getAnsiColorCode()
+                                        + "\n"
+                        );
+                    }
+
+
+                } catch (InputMismatchException e) {
+                    System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                }
+            } else {
+                System.out.println("Localizamos sua conta. Confira os detalhes abaixo: ");
+                System.out.println(" - " + clientAccountsList.get(0).getAccountNumber());
+
+                while (true) {
+                    System.out.println("Digite a chave PIX para qual deseja efetuar a transferencia: ");
+                    pixKey = new Scanner(System.in).nextLine();
+
+                    if (pixKey.isEmpty()) {
+                        System.err.println("Valor vazio!");
+                    } else {
+                        break;
+                    }
+                }
+
+                System.out.println("Digite o valor que deseja transferir: ");
+                try {
+                    double value = new Scanner(System.in).nextDouble();
+                    accountService.withdraw(clientAccountsList.get(0).getAccountNumber(), value);
+                    System.out.println(
+                            "Transferencia realizada com sucesso!\n"
+                                    + "O valor de R$ " + value
+                                    + "foi transferido para o PIX: " + pixKey
+                    );
+                    break;
+                } catch (InputMismatchException e) {
+                    System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                }
+            }
+            System.out.println("\nDeseja efetuar outra transferencia PIX?(S/N)");
+            clientOption = validateClientOptionYesOrNo();
+            if (clientOption != 'S') {
+                runningTransferMenu = true;
+            }
+        }
+    }
+
+    private String inputPixKey() {
+        String pixKey = null;
+        boolean inputPixKeyMenu = false;
+        int inputPixKeyMenuOption = 0;
+
+        while (!inputPixKeyMenu) {
+            System.out.println("""
+                    Selecione uma opção abaixo:
+                    1 - CPF
+                    2 - CNPJ
+                    3 - E-mail
+                    4 - Celular
+                    5 - Chave Aleatória
+                    0 - Voltar"""
+            );
+
+            inputPixKeyMenuOption = new Scanner(System.in).nextInt();
+            if (inputPixKeyMenuOption < 0 || inputPixKeyMenuOption > 5) {
+                System.err.println(SystemMessages.INVALID_OPTION.getFieldName());
+            } else {
+                System.out.println("Digite a chave PIX: ");
+                pixKey = new Scanner(System.in).nextLine();
+                switch (inputPixKeyMenuOption) {
+                    case 1:
+                        if (!CPFValidator.validateCPF(pixKey)) {
+                            System.out.println("Falha ao validar o CPF");
+                        }
+                        break;
+                    case 2:
+                        //if(!CNPJValidator.validateCNPJ(pixKey)){
+                        //             System.out.println("Falha ao validar o CNPJ");
+                        //}
+                        break;
+                    case 3:
+                        if (!EmailValidator.validateEmail(pixKey)) {
+                            System.out.println("Falha ao validar o E-mail");
+                        }
+                        break;
+                    case 4:
+                        if (!PhoneNumberValidator.validatePhoneNumber(pixKey)) {
+                            System.out.println("Falha ao validar o CPF");
+                        }
+                        break;
+                    case 5:
+                        break;
+                    case 0:
+                        pixKey = null;
+                        inputPixKeyMenu = true;
+                        break;
+                }
+            }
+        }
+        return pixKey;
+    }
+
+    private void transferToSameBank(Client client) throws  AccountNotFoundException {
+
+        clientAccountsList = accountService.findAccountsByCPF(client.getCpf());
+
+        boolean runningTransferMenu = false;
+
+        while (!runningTransferMenu) {
+            if (clientAccountsList.size() > 1) {
+                System.out.println("\nVimos aqui que você possui mais de uma conta conosco.\n");
+
+                System.out.println("Número da Conta - Tipo da Conta");
+                for (Account account : clientAccountsList) {
+                    System.out.println(account.getAccountNumber()
+                            + " - " + account.getAccountType().getAccountTypeName());
+                }
+                System.out.println("\nPressione 0 para voltar");
+
+                System.out.println("\nPor favor digite o numero da conta que deseja utlizar: ");
+
+                try {
+                    long senderAccountNumber = new Scanner(System.in).nextLong();
+
+                    if (senderAccountNumber == 0) {
+                        break;
+                    }
+
+                    Account senderAccount = null;
+                    for (Account account : clientAccountsList) {
+                        if (account.getAccountNumber() != senderAccountNumber) {
+                            System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
+                        } else {
+                            senderAccount = account;
+
+                            System.out.println("Digite o número da conta 'Eightbank' que deseja transferir: ");
+                            try {
+                                long receiverAccountNumber = new Scanner(System.in).nextLong();
+
+                                if (receiverAccountNumber == senderAccountNumber) {
+                                    System.out.println(
+                                            AnsiColors.ANSI_RED.getAnsiColorCode()
+                                                    + "Digite uma conta diferente da conta de origem!"
+                                                    + AnsiColors.ANSI_RESET.getAnsiColorCode()
+                                    );
+                                    break;
+                                } else {
+                                    try {
+                                        Account receiverAccount = accountService.findAccountByNumber(receiverAccountNumber);
+                                        System.out.println("Digite o valor que deseja transferir: ");
+                                        try {
+                                            double value = new Scanner(System.in).nextDouble();
+                                            accountService.withdraw(senderAccount.getAccountNumber(), value);
+                                            accountService.deposit(receiverAccount.getAccountNumber(), value);
+                                            System.out.println(
+                                                    "Transferencia realizada com sucesso!\n"
+                                                            + "O valor de R$ " + value
+                                                            + "foi transferido para a conta: "
+                                                            + receiverAccount.getAccountNumber()
+                                            );
+                                            break;
+                                        } catch (InputMismatchException e) {
+                                            System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                                        }
+                                    } catch (AccountNotFoundException e) {
+                                        System.out.println(AnsiColors.ANSI_RED + "Conta destino não localizada!" + AnsiColors.ANSI_RESET);
+                                    } catch (InsufficientFundsException | InvalidValueException e){
+                                        System.out.println(e.getMessage());
+                                    }
+                                }
+                            } catch (InputMismatchException e) {
+                                System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                            }
+                        }
+                    }
+
+                    if (senderAccount == null) {
+                        throw new AccountNotFoundException(
+                                "\n"
+                                        + AnsiColors.ANSI_RED.getAnsiColorCode()
+                                        + "Conta não está na lista!"
+                                        + AnsiColors.ANSI_RESET.getAnsiColorCode()
+                                        + "\n"
+                        );
+                    }
+
+
+                } catch (InputMismatchException e) {
+                    System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                }
+            } else {
+                Account senderAccount = clientAccountsList.get(0);
+
+                System.out.println(
+                        "\nNúmero da Conta: " + senderAccount.getAccountNumber()
+                                + "\nTipo da Conta: " + senderAccount.getAccountType().getAccountTypeName()
+                                + "\nSaldo atual: " + senderAccount.getBalance()
+                );
+
+                System.out.println("Digite o número da conta 'Eightbank' que deseja transferir: ");
+                try {
+                    long receiverAccountNumber = new Scanner(System.in).nextLong();
+                    try {
+                        Account receiverAccount = accountService.findAccountByNumber(receiverAccountNumber);
+
+                        if (receiverAccountNumber == senderAccount.getAccountNumber()) {
+                            System.out.println(
+                                    AnsiColors.ANSI_RED.getAnsiColorCode()
+                                            + "Digite uma conta diferente da conta de origem!"
+                                            + AnsiColors.ANSI_RESET.getAnsiColorCode()
+                            );
+                            break;
+                        } else {
+                            System.out.println("Digite o valor que deseja transferir: ");
+                            try {
+                                double value = new Scanner(System.in).nextDouble();
+                                accountService.withdraw(senderAccount.getAccountNumber(), value);
+                                accountService.deposit(receiverAccount.getAccountNumber(), value);
+                                System.out.println(
+                                        "Transferencia realizada com sucesso!\n"
+                                                + "O valor de R$ " + value
+                                                + " foi transferido para a conta: "
+                                                + receiverAccount.getAccountNumber()
+                                );
+                                break;
+                            } catch (InputMismatchException e) {
+                                System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                            } catch (InsufficientFundsException | InvalidValueException e){
+                                System.out.println(e.getMessage());
+                            }
+                        }
+                    } catch (AccountNotFoundException e) {
+                        System.out.println(AnsiColors.ANSI_RED + "Conta destino não localizada!" + AnsiColors.ANSI_RESET);
+                    }
+                } catch (InputMismatchException e) {
+                    System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                }
+            }
+
+            System.out.println("\nRetornando ao menu de transferencias...\n");
+            break;
+        }
+    }
+
+    private void withdrawFromAccount(Client client) throws AccountNotFoundException {
+        clientAccountsList = accountService.findAccountsByCPF(client.getCpf());
+
+        boolean runningWithdrawFromAccount = false;
+        char clientOption = ' ';
+
+        while (!runningWithdrawFromAccount) {
+            if (clientAccountsList.size() > 1) {
+                System.out.println("\nVimos aqui que você possui mais de uma conta conosco.\n");
+
+                System.out.println("Número da Conta - Tipo da Conta");
+                for (Account account : clientAccountsList) {
+                    System.out.println(" - " + account.getAccountNumber()
+                            + " - " + account.getAccountType().getAccountTypeName());
+                }
+
+                System.out.println("\nPor favor digite o numero da conta que deseja efetuar o saque: ");
+
+                try {
+                    long accountNumber = new Scanner(System.in).nextLong();
+
+                    Account accountToCheck = null;
+
+                    for (Account account : clientAccountsList) {
+                        if (account.getAccountNumber() != accountNumber) {
+                            System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
+                        } else {
+                            accountToCheck = accountService.findAccountByNumber(accountNumber);
+
+                            System.out.println("Digite o valor que deseja sacar: ");
+                            try {
+                                double value = new Scanner(System.in).nextDouble();
+                                accountService.withdraw(accountToCheck.getAccountNumber(), value);
+                                break;
+                            } catch (InputMismatchException e) {
+                                System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                            } catch (InsufficientFundsException e) {
+                                System.err.println("Saldo insuficiente!");
+                            } catch (InvalidValueException e){
+                                System.out.println(e.getMessage());
+                            }
+                        }
+                    }
+
+                    if (accountToCheck == null) {
+                        throw new AccountNotFoundException(
+                                "\n"
+                                        + AnsiColors.ANSI_RED.getAnsiColorCode()
+                                        + "Conta não está na lista!"
+                                        + AnsiColors.ANSI_RESET.getAnsiColorCode()
+                                        + "\n"
+                        );
+                    }
+                } catch (InputMismatchException e) {
+                    System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                }
+            } else {
+                Account clientAccount = clientAccountsList.get(0);
+
+                System.out.println(
+                        "\nNúmero da Conta: " + clientAccount.getAccountNumber()
+                                + "\nTipo da Conta: " + clientAccount.getAccountType().getAccountTypeName()
+                                + "\nSaldo atual: " + clientAccount.getBalance()
+                );
+
+                System.out.println("Digite o valor que deseja sacar: ");
+                try {
+                    double value = new Scanner(System.in).nextDouble();
+                    accountService.withdraw(clientAccount.getAccountNumber(), value);
+                    System.out.println("Saque realizado com sucesso!");
+                } catch (InputMismatchException e) {
+                    System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                } catch (InsufficientFundsException e) {
+                    System.err.println("Saldo insuficiente!");
+                } catch (InvalidValueException e){
+                    System.out.println(e.getMessage());
+                }
+            }
+
+            System.out.println("\nDeseja efetuar outro saque?(S/N)");
+            clientOption = validateClientOptionYesOrNo();
+            if (clientOption != 'S') {
+                runningWithdrawFromAccount = true;
             }
         }
     }
@@ -491,48 +1371,96 @@ public class ClientService {
     private void depositOnClientAccount(Client client) throws AccountNotFoundException {
         clientAccountsList = accountService.findAccountsByCPF(client.getCpf());
 
-        if (clientAccountsList.size() > 1) {
-            System.out.println("\nVimos aqui que você possui mais de uma conta conosco."
-                    + "Por favor digite o numero da conta que deseja obter o saldo");
+        boolean runningDepositMenu = false;
+        char clientOption = ' ';
 
-            System.out.println("Contas encontradas: ");
-            for (Account account : clientAccountsList) {
-                System.out.println(" - " + account.getAccountNumber());
-            }
+        while (!runningDepositMenu) {
+            if (clientAccountsList.size() > 1) {
+                System.out.println("\nVimos aqui que você possui mais de uma conta conosco.\n");
 
-            try {
-                long accountNumber = new Scanner(System.in).nextLong();
+                System.out.println("Número da Conta - Tipo da Conta");
                 for (Account account : clientAccountsList) {
-                    if (account.getAccountNumber() == accountNumber) {
-                        System.out.println("Digite o valor que deseja depositar: ");
-                        try {
-                            double value = new Scanner(System.in).nextDouble();
-                            accountService.deposit(accountNumber, value);
-                        } catch (InputMismatchException e) {
-                            System.err.println(SystemMessages.INVALID_CARACTER.getFieldName());
-                        }
-                        break;
-                    } else {
-                        throw new AccountNotFoundException("Esta conta não está na lista.");
-                    }
+                    System.out.println(
+                            account.getAccountNumber()
+                                    + " - "
+                                    + account.getAccountType().getAccountTypeName());
                 }
+                System.out.println("0 - Voltar");
 
-            } catch (InputMismatchException e) {
-                System.err.println(SystemMessages.INVALID_CARACTER.getFieldName());
+                System.out.println("\nPor favor digite o numero da conta que deseja efetuar o depósito: ");
+
+                try {
+                    long accountNumber = new Scanner(System.in).nextLong();
+
+                    if (accountNumber == 0) {
+                        System.out.println("Voltando...\n");
+                        break;
+                    }
+
+                    Account accountToCheck = null;
+
+                    for (Account account : clientAccountsList) {
+                        if (account.getAccountNumber() != accountNumber) {
+                            System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
+                        } else {
+                            accountToCheck = accountService.findAccountByNumber(accountNumber);
+
+                            System.out.println("Digite o valor que deseja depositar: ");
+                            try {
+                                double value = new Scanner(System.in).nextDouble();
+                                accountService.deposit(accountToCheck.getAccountNumber(), value);
+                                break;
+                            } catch (InputMismatchException e) {
+                                System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                            }
+                        }
+                    }
+
+                    if (accountToCheck == null) {
+                        throw new AccountNotFoundException(
+                                "\n"
+                                        + AnsiColors.ANSI_RED.getAnsiColorCode()
+                                        + "Conta não está na lista!"
+                                        + AnsiColors.ANSI_RESET.getAnsiColorCode()
+                                        + "\n"
+                        );
+                    }
+
+                    System.err.println();
+
+                    System.out.println("\nDeseja efetuar outro depósito?(S/N)");
+                    clientOption = validateClientOptionYesOrNo();
+                    if (clientOption != 'S') {
+                        runningDepositMenu = true;
+                    }
+
+                } catch (InputMismatchException e) {
+                    System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                }
+            } else {
+                Account clientAccount = clientAccountsList.get(0);
+
+                System.out.println(
+                        "\nNúmero da Conta: " + clientAccount.getAccountNumber()
+                                + "\nTipo da Conta: " + clientAccount.getAccountType().getAccountTypeName()
+                                + "\nSaldo atual: " + clientAccount.getBalance()
+                );
+
+                System.out.println("\nDigite o valor que deseja depositar: ");
+                try {
+                    double value = new Scanner(System.in).nextDouble();
+                    accountService.deposit(clientAccountsList.get(0).getAccountNumber(), value);
+                    System.out.println("Depósito efetuado com sucesso!\n");
+                } catch (InputMismatchException e) {
+                    System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                }
             }
-        } else {
-            System.out.println("Contas encontradas: ");
-            System.out.println(" - " + clientAccountsList.get(0).getAccountNumber());
-
-            System.out.println("Digite o valor que deseja depositar: ");
-            try {
-                double value = new Scanner(System.in).nextDouble();
-                accountService.deposit(clientAccountsList.get(0).getAccountNumber(), value);
-            } catch (InputMismatchException e) {
-                System.err.println(SystemMessages.INVALID_CARACTER.getFieldName());
+            System.out.println("Deseja efetuar outro depósito?(S/N)");
+            clientOption = validateClientOptionYesOrNo();
+            if (clientOption != 'S') {
+                break;
             }
         }
-
     }
 
     private void getClientBalance(Client client) throws AccountNotFoundException {
@@ -544,54 +1472,63 @@ public class ClientService {
         while (!runningGetClientBalanceMenu) {
             if (clientAccountsList.size() > 1) {
 
-                System.out.println("\nVimos aqui que você possui mais de uma conta conosco.\n"
-                        + "Por favor digite o numero da conta que deseja obter o saldo");
+                System.out.println("\nVimos aqui que você possui mais de uma conta conosco.\n");
 
-                System.out.println("Contas encontradas: ");
+                System.out.println("Número da Conta - Tipo da Conta");
                 for (Account account : clientAccountsList) {
-                    System.out.println(" - " + account.getAccountNumber());
+                    System.out.println(" - " + account.getAccountNumber()
+                            + " - " + account.getAccountType().getAccountTypeName());
                 }
+
+                System.out.println("\nPor favor digite o numero da conta que deseja visualizar o saldo: ");
 
                 try {
                     long accountNumber = new Scanner(System.in).nextLong();
+
+                    Account accountToCheck = null;
+
                     for (Account account : clientAccountsList) {
-                        if (account.getAccountNumber() == accountNumber) {
+                        if (account.getAccountNumber() != accountNumber) {
+                            System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
+                        } else {
+                            accountToCheck = accountService.findAccountByNumber(accountNumber);
+
                             System.out.println(
-                                    "Conta selecionada: "
-                                            + account.getAccountNumber()
-                                            + " - " + account.getAccountType().getAccountTypeName()
+                                    "\nConta selecionada: "
+                                            + accountToCheck.getAccountNumber()
+                                            + " - " + accountToCheck.getAccountType().getAccountTypeName()
                                             + "\n"
-                                            + "Saldo atual: R$ " + account.getBalance()
+                                            + "Saldo atual: R$ " + accountToCheck.getBalance()
                             );
-                            System.out.println("Deseja visualizar o saldo de outra conta?(S/N)");
-                            clientOption = validateClientOptionYesOrNo();
-                            if (clientOption != 'S') {
-                                runningGetClientBalanceMenu = true;
-                                break;
-                            }
+                            break;
                         }
                     }
+
+                    if (accountToCheck == null) {
+                        throw new AccountNotFoundException("Conta não está na lista!");
+                    }
+
+                    System.out.println("\nDeseja visualizar o saldo de outra conta?(S/N)");
+                    clientOption = validateClientOptionYesOrNo();
+                    if (clientOption != 'S') {
+                        runningGetClientBalanceMenu = true;
+                    }
                 } catch (InputMismatchException e) {
-                    System.err.println(SystemMessages.INVALID_CARACTER.getFieldName());
+                    System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
                 }
             } else {
-                System.out.println("Contas encontradas: ");
-                for (Account account : clientAccountsList) {
-                    System.out.println(
-                            "Conta selecionada: "
-                                    + account.getAccountNumber()
-                                    + " - " + account.getAccountType().getAccountTypeName()
-                                    + "\n"
-                                    + "Saldo atual: R$ " + account.getBalance()
-                    );
-                }
-                System.out.println("Deseja continuar visualizando saldos?(S/N)");
-                clientOption = validateClientOptionYesOrNo();
-                if (clientOption != 'S') {
-                    runningGetClientBalanceMenu = true;
-                    break;
-                }
+                Account clientAccount = clientAccountsList.get(0);
 
+                System.out.println(
+                        "\nNúmero da Conta: " + clientAccount.getAccountNumber()
+                                + "\nTipo da Conta: " + clientAccount.getAccountType().getAccountTypeName()
+                                + "\nSaldo atual: " + clientAccount.getBalance()
+                );
+            }
+            System.out.println("\nDeseja continuar visualizando saldos?(S/N)");
+            clientOption = validateClientOptionYesOrNo();
+            if (clientOption != 'S') {
+                runningGetClientBalanceMenu = true;
             }
         }
     }
@@ -613,10 +1550,87 @@ public class ClientService {
                     System.out.println("Opção inválida!");
                 }
             } catch (InputMismatchException e) {
-                System.out.println(SystemMessages.INVALID_CARACTER.getFieldName());
+                System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
             }
         }
 
         return clientOption;
+    }
+
+    public void importClientsFromFile(String fileName) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        while (true) {
+            //System.out.println("Digite o nome do arquivo:");
+            //String fileName = new Scanner(System.in).nextLine();
+            if (!fileName.isEmpty()) {
+                if (!FileNameValidator.validateFileName(fileName)) {
+                    System.err.println("Formato invalido!");
+                } else {
+                    BufferedReader reader = null;
+                    try {
+                        reader = new BufferedReader(new FileReader(fileName));
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            String[] fields = line.split(",");
+                            String cpf = fields[0];
+                            double grossMonthlyIncome = Double.parseDouble(fields[1]);
+                            String email = fields[2];
+                            String name = fields[3];
+
+                            String dateOfBirth = fields[4];
+                            String[] dateOfBirthFields = dateOfBirth.split("/");
+                            int dayOfMonth = Integer.parseInt(dateOfBirthFields[0]);
+                            int month = Integer.parseInt(dateOfBirthFields[1]);
+                            int year = Integer.parseInt(dateOfBirthFields[2]);
+                            LocalDate dateOfBirthConverted = LocalDate.of(year, month, dayOfMonth);
+
+                            Address address = new Address(
+                                    fields[5],
+                                    Long.parseLong(fields[6]),
+                                    fields[7],
+                                    fields[8],
+                                    fields[9],
+                                    fields[10]
+                            );
+
+                            String phoneNumber = fields[11];
+                            String passwordString = PasswordService.generateStrongPassword(fields[12]);
+
+                            clientCategory = checkClientCategory(grossMonthlyIncome);
+
+                            client = new Client(
+                                    email,
+                                    passwordString,
+                                    name,
+                                    cpf,
+                                    dateOfBirthConverted,
+                                    address,
+                                    clientCategory,
+                                    phoneNumber,
+                                    grossMonthlyIncome
+                            );
+
+                            clientDAO.addClient(client);
+
+                            registerClientAccounts(client, 3);
+
+                            // Lista os usuários cadastrados, à partir do método toString
+                            //System.out.println("Clientes\n");
+                            //clientDAO.listClients();
+
+                            //Listar contas e titulares
+                            //System.out.println("\n Clientes e contas");
+                            //accountService.listAccounts();
+                        }
+                        reader.close();
+                    } catch (IOException e) {
+                        System.err.println("Erro ao carregar o arquivo: " + fileName);
+                    }
+                    System.out.println("Usuários importados com sucesso!");
+                    break;
+                }
+            } else {
+                System.err.println("Digite o nome do arquivo!");
+            }
+        }
     }
 }

@@ -6,8 +6,16 @@ import br.com.cdb.java.grupo4.eightbank.model.client.Client;
 public class SavingsAccount extends Account {
     private double annualPercentageYield;
 
-    public SavingsAccount(double balance, Client owner, double annualPercentageYield) {
-        super(balance, AccountType.SAVINGS_ACCOUNT, owner);
+    public SavingsAccount(double balance, String ownerCpf, double annualPercentageYield) {
+        super(balance, AccountType.SAVINGS_ACCOUNT, ownerCpf);
+        this.annualPercentageYield = annualPercentageYield;
+    }
+
+    public double getAnnualPercentageYield() {
+        return annualPercentageYield;
+    }
+
+    public void setAnnualPercentageYield(double annualPercentageYield) {
         this.annualPercentageYield = annualPercentageYield;
     }
 

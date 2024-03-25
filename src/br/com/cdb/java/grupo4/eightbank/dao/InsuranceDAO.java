@@ -8,4 +8,9 @@ import java.util.List;
 public class InsuranceDAO {
 
     List<Insurance> insuranceList = new ArrayList<>();
+
+    public void addInsurance(Insurance insurance) {
+        insurance.setPolicyNumber(insuranceList.size() + 1);
+        insuranceList.add(insurance);
+    }
 }

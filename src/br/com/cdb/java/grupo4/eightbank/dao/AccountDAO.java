@@ -1,5 +1,7 @@
 package br.com.cdb.java.grupo4.eightbank.dao;
 
+import br.com.cdb.java.grupo4.eightbank.enuns.AnsiColors;
+import br.com.cdb.java.grupo4.eightbank.enuns.SystemMessages;
 import br.com.cdb.java.grupo4.eightbank.exceptions.AccountNotFoundException;
 import br.com.cdb.java.grupo4.eightbank.exceptions.InsufficientFundsException;
 import br.com.cdb.java.grupo4.eightbank.exceptions.InvalidValueException;
@@ -15,7 +17,7 @@ public class AccountDAO {
     public void listAccounts() {
         for (Account account : accountList) {
             System.out.println(account);
-            System.out.println(account.getOwner());
+            System.out.println(account.getOwnerCPF());
         }
     }
 
@@ -24,19 +26,10 @@ public class AccountDAO {
         accountList.add(account);
     }
 
-    public Account searchAccountByNumber(long accountNumber) {
-        for (Account account : accountList) {
-            if (account.getAccountNumber() == accountNumber) {
-                return account;
-            }
-        }
-        return null;
-    }
-
-    public boolean setAccountOwner(Account account, Client client) {
+    public boolean setAccountOwner(Account account, String ownerCPF) {
         for (Account a : accountList) {
             if (a.equals(account)) {
-                account.setOwner(client);
+                account.setOwnerCPF(ownerCPF);
                 return true;
             }
         }
@@ -44,48 +37,48 @@ public class AccountDAO {
     }
 
     public Account findAccountByNumber(long accountNumber) throws AccountNotFoundException {
+        Account account = null;
+
         for (Account a : this.accountList) {
             if (a.getAccountNumber() == accountNumber) {
-                return a;
-            } else {
-                throw new AccountNotFoundException("Conta não localizada!");
-            }
-        }
-        return null;
-    }
-
-    public List<Account> findAccountByClientCPF(String cpf) throws AccountNotFoundException {
-        List<Account> clientAccounts = new ArrayList<>();
-
-        for (Account a : this.accountList) {
-            if (a.getOwner().getCpf().equals(cpf)) {
-                clientAccounts.add(a);
+                account = a;
+                break;
             }
         }
 
-        if (clientAccounts.isEmpty()) {
-            throw new AccountNotFoundException("Não foram localizadas contas para este CPF!");
+        if (account == null) {
+            throw new AccountNotFoundException("\n"
+                    + AnsiColors.ANSI_RED.getAnsiColorCode()
+                    + "Conta não localizada!"
+                    + AnsiColors.ANSI_RESET.getAnsiColorCode()
+                    + "\n");
+        } else {
+            return account;
         }
-
-        return clientAccounts;
     }
 
     public void withdrawValue(long accountNumber, double value)
             throws InsufficientFundsException, InvalidValueException, AccountNotFoundException {
+        boolean validateAccountSearch = false;
         double balance = 0;
         if (value >= 0) {
             for (Account a : this.accountList) {
-                if (a.getAccountNumber() == accountNumber) {
-                    if (a.getBalance() >= value) {
-                        a.setBalance(a.getBalance() - value);
-                        balance = a.getBalance();
-                    } else {
-                        throw new InsufficientFundsException("Saldo Insuficiente!");
-                    }
+                if (a.getAccountNumber() != accountNumber) {
+                    System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
+                } else if (a.getBalance() >= value) {
+                    validateAccountSearch = true;
+                    a.setBalance(a.getBalance() - value);
+                    balance = a.getBalance();
+                    break;
                 } else {
-                    throw new AccountNotFoundException("Conta de origem não localizada!");
+                    throw new InsufficientFundsException("Saldo Insuficiente!");
                 }
             }
+
+            if (!validateAccountSearch) {
+                throw new AccountNotFoundException("Conta de origem não localizada!");
+            }
+
         } else {
             throw new InvalidValueException("Valor inválido!");
         }
@@ -94,47 +87,63 @@ public class AccountDAO {
     }
 
     public void depositValue(long accountNumber, double value) throws InvalidValueException, AccountNotFoundException {
-        double balance = 0;
+        boolean validateAccountSearch = false;
         if (value > 0) {
             for (Account a : this.accountList) {
-                if (a.getAccountNumber() == accountNumber) {
-                    a.setBalance(a.getBalance() + value);
-                    balance = a.getBalance();
-                    break;
+                if (a.getAccountNumber() != accountNumber) {
+                    System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
                 } else {
-                    throw new AccountNotFoundException("Conta de destino não localizada!");
+                    validateAccountSearch = true;
+                    a.setBalance(a.getBalance() + value);
+                    break;
                 }
             }
         } else {
-            throw new InvalidValueException("Valor do saque inválido!");
+            throw new InvalidValueException(
+                    AnsiColors.ANSI_RED.getAnsiColorCode()
+                            + SystemMessages.INVALID_VALUE.getFieldName()
+                            + AnsiColors.ANSI_RESET.getAnsiColorCode()
+            );
         }
-        System.out.println("Depósito realizado com sucesso!\n"
-                + "Saldo atual - R$ " + balance);
+
+        if (!validateAccountSearch) {
+            throw new AccountNotFoundException(
+                    AnsiColors.ANSI_RED.getAnsiColorCode()
+                            + "Conta não localizada!"
+                            + AnsiColors.ANSI_RESET.getAnsiColorCode()
+            );
+        }
     }
 
-    public void checkBalance(long accountNumber) throws AccountNotFoundException {
+    public double checkBalance(long accountNumber) throws AccountNotFoundException {
+        boolean validateAccountSearch = false;
         double balance = 0;
-        for(Account a: this.accountList){
-            if(a.getAccountNumber() == accountNumber){
+        for (Account a : this.accountList) {
+            if (a.getAccountNumber() != accountNumber) {
+                System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
+            } else {
+                validateAccountSearch = true;
                 balance = a.getBalance();
                 break;
-            } else {
-                throw new AccountNotFoundException("Conta não localizada!");
             }
         }
-        System.out.println("Seu saldo atual è: R$ " + balance);
+        if (!validateAccountSearch) {
+            throw new AccountNotFoundException("Conta não localizada!");
+        } else {
+            return balance;
+        }
     }
 
     public List<Account> searchAccountByCpf(String cpf) throws AccountNotFoundException {
         List<Account> clientAccountsList = new ArrayList<>();
 
-        for(Account a: this.accountList){
-            if(a.getOwner().getCpf().equals(cpf)){
+        for (Account a : this.accountList) {
+            if (a.getOwnerCPF().equals(cpf)) {
                 clientAccountsList.add(a);
             }
         }
 
-        if(clientAccountsList.size() == 0){
+        if (clientAccountsList.isEmpty()) {
             throw new AccountNotFoundException("Não foram localizadas contas para o seu CPF!");
         } else {
             return clientAccountsList;

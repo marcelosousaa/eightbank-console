@@ -10,6 +10,7 @@ import java.util.Set;
 
 public class CardFactory {
     private static final Set<String> issuedCardNumbers = new HashSet<>();
+
     private static final SecureRandom secureRandom = new SecureRandom();
     private static final Random random = new Random();
     private static final int CARD_NUMBER_LENGTH = 16;
@@ -29,6 +30,7 @@ public class CardFactory {
     private static String generateUniqueCardNumber() {
         while (true) {
             String cardNumber = generateRandomCardNumber();
+
             if (!issuedCardNumbers.contains(cardNumber) && isValidLuhn(cardNumber)) {
                 issuedCardNumbers.add(cardNumber);
                 return cardNumber;

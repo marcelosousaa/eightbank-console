@@ -1,5 +1,6 @@
 package br.com.cdb.java.grupo4.eightbank.usecase;
 
+
 import br.com.cdb.java.grupo4.eightbank.dao.CardDAO;
 import br.com.cdb.java.grupo4.eightbank.dao.ClientDAO;
 import br.com.cdb.java.grupo4.eightbank.model.card.Card;
@@ -7,11 +8,15 @@ import br.com.cdb.java.grupo4.eightbank.model.card.CardFactory;
 import br.com.cdb.java.grupo4.eightbank.enuns.CardType;
 import br.com.cdb.java.grupo4.eightbank.model.client.Client;
 
+
+
+
 import java.time.LocalDate;
 import java.util.Scanner;
 
 public class CardService {
     private Scanner scanner = new Scanner(System.in);
+
     private ClientDAO clientDAO;
     private CardDAO cardDAO; // Assumindo inicialização correta
 
@@ -147,6 +152,7 @@ public class CardService {
 
         cardDAO.removeCard(cardNumber);
         System.out.println("Cartão desativado com sucesso.");
+
     }
 
     private String requestCardPassword() {
@@ -183,5 +189,5 @@ public class CardService {
     private int generateCVV() {
         return (int) (Math.random() * 900) + 100; // Gera um número aleatório entre 100 e 999.
     }
-
 }
+

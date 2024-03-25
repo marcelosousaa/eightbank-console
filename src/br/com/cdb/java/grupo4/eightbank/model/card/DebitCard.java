@@ -1,10 +1,11 @@
 package br.com.cdb.java.grupo4.eightbank.model.card;
 
 import java.time.LocalDate;
-//aa
+
 public class DebitCard extends Card {
     private double dailyLimit;
     private double dailySpend;
+
 
     public DebitCard(String number, LocalDate expirationDate, int cvv, String ownerName, String clientCPF, double dailyLimit) {
         super(number, expirationDate, ownerName, clientCPF, cvv);
