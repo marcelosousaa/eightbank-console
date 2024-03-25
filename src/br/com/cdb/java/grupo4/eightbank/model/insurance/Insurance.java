@@ -42,4 +42,15 @@ public class Insurance {
     public InsuranceType getInsuranceType() {
         return insuranceType;
     }
+
+    @Override
+    public String toString() {
+        return "Insurance{" +
+                "policyNumber=" + policyNumber +
+                ", issueDate=" + issueDate +
+                ", policyValue=" + policyValue +
+                ", policyConditions='" + policyConditions + '\'' +
+                ", insuranceType=" + insuranceType +
+                '}';
+    }
 }

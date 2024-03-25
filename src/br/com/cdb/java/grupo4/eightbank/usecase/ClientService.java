@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
+import java.util.spi.AbstractResourceBundleProvider;
 
 public class ClientService {
     List<Account> clientAccountsList;
@@ -524,7 +525,7 @@ public class ClientService {
         }
     }
 
-    public void clientMenu(Client client) {
+    public void clientMenu(Client client) throws AccountNotFoundException {
         boolean runningClientMenu = false;
 
         while (!runningClientMenu) {
@@ -583,7 +584,7 @@ public class ClientService {
                         this.cardService.requestCard(client);
                         break;
                     case 6:
-                        showPaymentsMenu();
+                        showPaymentsMenu(client);
                         break;
                     case 7:
                         try {
@@ -606,40 +607,133 @@ public class ClientService {
         }
     }
 
-    private void showPaymentsMenu() {
-        System.out.println("Qual o valor do pagamento?");
-        double paymentValue = 0d;
+    private void showPaymentsMenu(Client client) throws AccountNotFoundException {
+        while (true) {
 
-        try {
-            paymentValue = new Scanner(System.in).nextDouble();
-
-            System.out.println("E qual a forma de pagamento?"
-                    + "\n1 - Débito em conta"
-                    + "\n2 - Pagar com cartão"
-                    + "\n0 - Voltar"
-            );
+            System.out.println("Qual o valor do pagamento?");
+            double paymentValue = 0d;
 
             try {
-                int option = new Scanner(System.in).nextInt();
+                paymentValue = new Scanner(System.in).nextDouble();
 
-                switch (option) {
-                    case 1:
-                        //Métodos pagamento via Conta Bancária
-                        break;
-                    case 2:
-                        //
-                        break;
-                    case 0:
-                        System.out.println("Voltando...");
-                        break;
-                    default:
-                        System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
+                if (paymentValue <= 0) {
+                    System.out.println(SystemMessages.INVALID_VALUE.getFieldName());
+                    break;
+                } else {
+
+                    System.out.println("E qual a forma de pagamento?"
+                            + "\n1 - Débito em conta"
+                            + "\n2 - Pagar com cartão"
+                            + "\n0 - Voltar"
+                    );
+
+                    try {
+                        int option = new Scanner(System.in).nextInt();
+
+                        switch (option) {
+                            case 1:
+                                payUsingAccounts(client, paymentValue);
+                                break;
+                            case 2:
+                                //
+                                break;
+                            case 0:
+                                System.out.println("Voltando...");
+                                break;
+                            default:
+                                System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
+                        }
+                    } catch (InputMismatchException e) {
+                        System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                    }
                 }
             } catch (InputMismatchException e) {
                 System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
             }
-        } catch (InputMismatchException e) {
-            System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+            break;
+        }
+    }
+
+    private void payUsingAccounts(Client client, double paymentValue) throws AccountNotFoundException {
+        clientAccountsList = accountService.findAccountsByCPF(client.getCpf());
+
+        boolean runningWithdrawFromAccount = false;
+        char clientOption = ' ';
+
+        while (!runningWithdrawFromAccount) {
+            if (clientAccountsList.size() > 1) {
+                System.out.println("\nVimos aqui que você possui mais de uma conta conosco.\n");
+
+                System.out.println("Número da Conta - Tipo da Conta");
+                for (Account account : clientAccountsList) {
+                    System.out.println(" - " + account.getAccountNumber()
+                            + " - " + account.getAccountType().getAccountTypeName());
+                }
+
+                System.out.println("\nPor favor digite o numero da conta que deseja utilizar para efetuar o pagamento: ");
+
+                try {
+                    long accountNumber = new Scanner(System.in).nextLong();
+
+                    Account accountToCheck = null;
+
+                    for (Account account : clientAccountsList) {
+                        if (account.getAccountNumber() != accountNumber) {
+                            System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
+                        } else {
+                            accountToCheck = accountService.findAccountByNumber(accountNumber);
+
+                            try {
+                                accountService.withdraw(accountToCheck.getAccountNumber(), paymentValue);
+                                System.out.println("Pagamento realizado com sucesso!");
+                                break;
+                            } catch (InsufficientFundsException e) {
+                                System.err.println("Saldo insuficiente!");
+                            } catch (InvalidValueException e) {
+                                System.out.println(e.getMessage());
+                            }
+                        }
+                    }
+
+                    if (accountToCheck == null) {
+                        throw new AccountNotFoundException(
+                                "\n"
+                                        + AnsiColors.ANSI_RED.getAnsiColorCode()
+                                        + "Conta não está na lista!"
+                                        + AnsiColors.ANSI_RESET.getAnsiColorCode()
+                                        + "\n"
+                        );
+                    }
+                } catch (InputMismatchException e) {
+                    System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                }
+            } else {
+                Account clientAccount = clientAccountsList.get(0);
+
+                System.out.println(
+                        "\nNúmero da Conta: " + clientAccount.getAccountNumber()
+                                + "\nTipo da Conta: " + clientAccount.getAccountType().getAccountTypeName()
+                                + "\nSaldo atual: " + clientAccount.getBalance()
+                );
+
+                System.out.println("Digite o valor do pagamento: ");
+                try {
+                    accountService.withdraw(clientAccount.getAccountNumber(), paymentValue);
+                    System.out.println("Pagamento realizado com sucesso!");
+                } catch (InputMismatchException e) {
+                    System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
+                } catch (InsufficientFundsException e) {
+                    System.err.println("Saldo insuficiente!");
+                } catch (InvalidValueException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+
+            System.out.println("\nDeseja efetuar outro pagamento?(S/N)");
+            clientOption = validateClientOptionYesOrNo();
+            if (clientOption != 'S') {
+                runningWithdrawFromAccount = true;
+            }
         }
     }
 
@@ -974,7 +1068,7 @@ public class ClientService {
                 System.out.println("\n");
             } else {
                 System.out.println("Rendimento anual: " + ((SavingsAccount) account).getAnnualPercentageYield());
-                for(int i = 1; i <= 5; i++){
+                for (int i = 1; i <= 5; i++) {
                     System.out.printf(
                             "Previsão de rendimento em + %d ano(s): R$ %.2f", i, ((SavingsAccount) account).calculateYields(i)
                     );

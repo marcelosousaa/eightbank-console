@@ -1,5 +1,6 @@
 package br.com.cdb.java.grupo4.eightbank;
 
+import br.com.cdb.java.grupo4.eightbank.exceptions.AccountNotFoundException;
 import br.com.cdb.java.grupo4.eightbank.exceptions.InvalidValueException;
 import br.com.cdb.java.grupo4.eightbank.model.client.Client;
 import br.com.cdb.java.grupo4.eightbank.usecase.ClientService;
@@ -10,8 +11,7 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class EightbankConsoleApplication {
-    public static void main(String[] args)
-            throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidValueException {
+    public static void main(String[] args) throws Exception {
 
         Client client;
         ClientService clientService = new ClientService();
