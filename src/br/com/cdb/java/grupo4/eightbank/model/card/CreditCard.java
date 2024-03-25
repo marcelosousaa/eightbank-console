@@ -6,49 +6,47 @@ public class CreditCard extends Card {
     private double limit;
     private double currentSpend;
 
-    // Construtor
-    public CreditCard(String number, LocalDate expirationDate, int cvv, String ownerName, double limit) {
-        super(number, expirationDate, cvv, ownerName);
+    public CreditCard(String number, LocalDate expirationDate, String ownerName, String clientCPF, double limit, int cvv) {
+        super(number, expirationDate, ownerName, clientCPF, cvv);
         this.limit = limit;
         this.currentSpend = 0.0;
+        this.cardType = "CREDIT";
     }
 
-    // Implementação do método abstrato makePayment da classe Card
     @Override
-    public void makePayment(double amount) {
-        if (!isValid()) {
-            throw new IllegalStateException("Cartão inválido ou desativado.");
+    public boolean makePayment(double amount) {
+        if (!isActive || (currentSpend + amount) > limit) {
+            return false; // Pagamento recusado devido a limite excedido ou cartão inativo.
         }
-
-        if (amount > (limit - currentSpend)) {
-            throw new IllegalArgumentException("Limite insuficiente para realizar a transação.");
+        double newSpend = currentSpend + amount;
+        if (newSpend > limit * 0.8){
+            double intrest = (newSpend - (limit * 0.8)) * 0.05;
+            currentSpend = newSpend + intrest;
+        }else {
+            currentSpend = newSpend;
         }
-
-        // Simula a realização do pagamento, atualizando o valor já gasto no cartão
-        currentSpend += amount;
-        System.out.println("Pagamento de R$ " + amount + " realizado com sucesso.");
+        return true;
     }
 
-    // Implementação do método abstrato updateLimit da classe Card
-    @Override
-    public void updateLimit(double newLimit) {
-        if (newLimit < currentSpend) {
-            throw new IllegalArgumentException("O novo limite não pode ser inferior ao valor já utilizado.");
+    public void applyMonthlyInterest() {
+        if (currentSpend > limit * 0.8) {
+            double interest = (currentSpend - (limit * 0.8)) * 0.05;
+            currentSpend += interest;
         }
-
-        this.limit = newLimit;
-        System.out.println("Limite do cartão atualizado para R$ " + newLimit);
     }
 
-    // Método para zerar o saldo utilizado (pode ser chamado após o pagamento da fatura, por exemplo)
-    public void resetCurrentSpend() {
-        this.currentSpend = 0.0;
-        System.out.println("Saldo utilizado no cartão de crédito foi zerado.");
+    public void resetMonthlySpend() {
+        currentSpend = 0;
     }
 
-    // Getters adicionais específicos do cartão de crédito
+    // Getters e setters
+
     public double getLimit() {
         return limit;
+    }
+
+    public void setLimit(double limit) {
+        this.limit = limit;
     }
 
     public double getCurrentSpend() {
