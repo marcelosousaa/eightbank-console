@@ -534,7 +534,8 @@ public class ClientService {
                             + "\n 3 - Saque"
                             + "\n 4 - Transferencias"
                             + "\n 5 - Cartões" // SUB-MENU SEGUROS
-                            + "\n 6 - Meu cadastro"
+                            + "\n 6 - Pagamentos"
+                            + "\n 7 - Meu cadastro"
                             + "\n 0 - Sair"
             );
 
@@ -581,6 +582,9 @@ public class ClientService {
                         this.cardService.requestCard(client);
                         break;
                     case 6:
+                        showPaymentsMenu();
+                        break;
+                    case 7:
                         try {
                             showProfileEditor(client);
                         } catch (Exception e) {
@@ -598,6 +602,23 @@ public class ClientService {
             } catch (InputMismatchException e) {
                 System.err.println(SystemMessages.INVALID_CHARACTER.getFieldName());
             }
+        }
+    }
+
+    private void showPaymentsMenu() {
+        System.out.println("Qual o valor do pagamento?");
+        double paymentValue = 0d;
+
+        try {
+            paymentValue = new Scanner(System.in).nextDouble();
+
+            System.out.println("E qual a forma de pagamento?"
+                    + "\n1 - Débito em conta"
+                    + "\2 - Pagar com cartão"
+                    + "\n0 - Voltar"
+            );
+        } catch (InputMismatchException e) {
+            System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
         }
     }
 
