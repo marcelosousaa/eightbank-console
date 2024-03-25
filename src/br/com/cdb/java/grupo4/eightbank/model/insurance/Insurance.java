@@ -23,7 +23,7 @@ public class Insurance {
         return policyNumber;
     }
 
-    public void setPolicyNumber(long policyNumber){
+    public void setPolicyNumber(long policyNumber) {
         this.policyNumber = policyNumber;
     }
 

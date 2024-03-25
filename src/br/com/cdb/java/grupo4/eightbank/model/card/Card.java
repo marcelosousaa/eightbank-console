@@ -1,4 +1,5 @@
 package br.com.cdb.java.grupo4.eightbank.model.card;
+
 import java.time.LocalDate;
 
 public abstract class Card {
@@ -24,12 +25,8 @@ public abstract class Card {
 
     // Métodos abstratos que serão implementados pelas subclasses
     public abstract void makePayment(double amount);
-    public abstract void updateLimit(double newLimit);
 
-    // Método para ativar ou desativar o cartão
-    public void setActive(boolean active) {
-        this.isActive = active;
-    }
+    public abstract void updateLimit(double newLimit);
 
     // Método para alterar a senha do CVV (Considerando que o CVV pode ser alterado como uma forma de "senha")
     public void changeCVV(int newCVV) {
@@ -41,8 +38,17 @@ public abstract class Card {
         return number;
     }
 
+    // Setters para propriedades que podem necessitar de atualização
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
     public LocalDate getExpirationDate() {
         return expirationDate;
+    }
+
+    public void setExpirationDate(LocalDate expirationDate) {
+        this.expirationDate = expirationDate;
     }
 
     public int getCvv() {
@@ -53,20 +59,16 @@ public abstract class Card {
         return ownerName;
     }
 
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
+
     public boolean isActive() {
         return isActive;
     }
 
-    // Setters para propriedades que podem necessitar de atualização
-    public void setNumber(String number) {
-        this.number = number;
-    }
-
-    public void setExpirationDate(LocalDate expirationDate) {
-        this.expirationDate = expirationDate;
-    }
-
-    public void setOwnerName(String ownerName) {
-        this.ownerName = ownerName;
+    // Método para ativar ou desativar o cartão
+    public void setActive(boolean active) {
+        this.isActive = active;
     }
 }

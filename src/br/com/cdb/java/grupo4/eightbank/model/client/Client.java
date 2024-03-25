@@ -42,6 +42,10 @@ public class Client {
         return cpf;
     }
 
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
+
     public ClientCategory getClientCategory() {
         return clientCategory;
     }
@@ -72,10 +76,6 @@ public class Client {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
-    }
-
-    public void setCpf(String cpf) {
-        this.cpf = cpf;
     }
 
     public double getGrossMonthlyIncome() {

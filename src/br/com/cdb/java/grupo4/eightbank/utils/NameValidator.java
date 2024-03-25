@@ -11,7 +11,7 @@ public class NameValidator {
         }
 
         String nameTrimmed = name.trim();
-        if (nameTrimmed.length() < MIN_NAME_LENGTH || nameTrimmed.length() > MAX_NAME_LENGTH){
+        if (nameTrimmed.length() < MIN_NAME_LENGTH || nameTrimmed.length() > MAX_NAME_LENGTH) {
             return false;
         }
 

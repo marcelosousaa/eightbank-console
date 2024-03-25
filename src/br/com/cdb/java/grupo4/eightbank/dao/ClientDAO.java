@@ -2,7 +2,6 @@ package br.com.cdb.java.grupo4.eightbank.dao;
 
 import br.com.cdb.java.grupo4.eightbank.enuns.SystemMessages;
 import br.com.cdb.java.grupo4.eightbank.exceptions.ClientNotFoundException;
-import br.com.cdb.java.grupo4.eightbank.model.client.Address;
 import br.com.cdb.java.grupo4.eightbank.model.client.Client;
 
 import java.util.ArrayList;
@@ -35,6 +34,15 @@ public class ClientDAO {
         return null;
     }
 
+    public boolean findClientByEmail(String email){
+        for(Client client : this.clientList){
+            if(client.getEmail().equals(email)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public Client searchClientById(int id) {
         for (Client client : clientList) {
             if (client.getId() == id) {
@@ -52,8 +60,7 @@ public class ClientDAO {
 
             if (!client.getCpf().equals(cpf)) {
                 System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
-            }
-            else {
+            } else {
                 finderStatus = true;
                 break;
             }

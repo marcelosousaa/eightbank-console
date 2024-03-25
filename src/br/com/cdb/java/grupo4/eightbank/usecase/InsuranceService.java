@@ -17,7 +17,7 @@ public class InsuranceService {
     InsuranceDAO insuranceDAO = new InsuranceDAO();
 
     public void showInsuranceMenu(Client client) {
-        while (true){
+        while (true) {
             System.out.println("Bem vindo ao menu de seguros do seu cartão de crédito."
                     + "\nQue tipo de seguro deseja adquirir hoje: "
                     + "\n1- Consultar meus seguros"
@@ -26,15 +26,15 @@ public class InsuranceService {
                     + "\n\nPression 0 para voltar."
             );
 
-            try{
+            try {
                 int menuOption = new Scanner(System.in).nextInt();
 
-                if(menuOption < 0 || menuOption > 3){
+                if (menuOption < 0 || menuOption > 3) {
                     System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
-                } else if(menuOption == 0){
+                } else if (menuOption == 0) {
                     break;
                 } else {
-                    switch (menuOption){
+                    switch (menuOption) {
                         case 1:
                             break;
                         case 2:
@@ -44,7 +44,7 @@ public class InsuranceService {
                     }
                 }
 
-            }catch (InputMismatchException e){
+            } catch (InputMismatchException e) {
                 System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
             }
 
@@ -55,11 +55,11 @@ public class InsuranceService {
 
     }
 
-    public void generateTravelInsurance(Card card){
+    public void generateTravelInsurance(Card card) {
 
     }
 
-    public void generateFraudInsurance(Card card){
+    public void generateFraudInsurance(Card card) {
 
         Insurance insurance = new Insurance(
                 LocalDate.now(),

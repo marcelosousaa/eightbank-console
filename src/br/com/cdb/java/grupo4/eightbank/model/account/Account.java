@@ -1,7 +1,6 @@
 package br.com.cdb.java.grupo4.eightbank.model.account;
 
 import br.com.cdb.java.grupo4.eightbank.enuns.AccountType;
-import br.com.cdb.java.grupo4.eightbank.model.client.Client;
 
 public abstract class Account {
     private long accountNumber;
@@ -31,11 +30,11 @@ public abstract class Account {
         this.balance = balance;
     }
 
-    public String getOwnerCPF(){
+    public String getOwnerCPF() {
         return this.ownerCPF;
     }
 
-    public void setOwnerCPF(String ownerCPF){
+    public void setOwnerCPF(String ownerCPF) {
         this.ownerCPF = ownerCPF;
     }
 

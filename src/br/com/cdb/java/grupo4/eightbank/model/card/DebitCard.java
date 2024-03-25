@@ -47,11 +47,11 @@ public class DebitCard extends Card {
         return dailyLimit;
     }
 
-    public double getDailySpend() {
-        return dailySpend;
-    }
-
     public void setDailyLimit(double dailyLimit) {
         this.dailyLimit = dailyLimit;
+    }
+
+    public double getDailySpend() {
+        return dailySpend;
     }
 }

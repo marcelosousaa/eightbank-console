@@ -2,7 +2,7 @@ package br.com.cdb.java.grupo4.eightbank.utils;
 
 public class CPFValidator {
 
-    public static boolean validateCPF(String  cpf){
+    public static boolean validateCPF(String cpf) {
         cpf = cpf.replaceAll("[^\\d]", ""); // Remove caracteres não numéricos
 
         if (cpf.length() != 11 || hasAllEqualDigits(cpf)) {
@@ -20,7 +20,7 @@ public class CPFValidator {
 
     private static int calulateDigit(String str, int[] weights) {
         int sum = 0;
-        for (int i = 0; i < str.length(); i++){
+        for (int i = 0; i < str.length(); i++) {
             int num = Integer.parseInt(str.substring(i, i + 1));
             sum += num * weights[i];
         }
@@ -28,7 +28,7 @@ public class CPFValidator {
         return result > 9 ? 0 : result;
     }
 
-    private static boolean hasAllEqualDigits (String cpf){
+    private static boolean hasAllEqualDigits(String cpf) {
         return cpf.chars().allMatch(c -> c == cpf.charAt(0));
     }
 }
