@@ -46,13 +46,20 @@ public class ClientDAO {
 
 
     public boolean searchClientByCPF(String cpf) {
+        boolean finderStatus = false;
+
         for (Client client : clientList) {
-            if (client.getCpf().equals(cpf)) {
-                return true;
+
+            if (!client.getCpf().equals(cpf)) {
+                System.out.println(SystemMessages.PROCESSING_PT_BR.getFieldName());
             }
-            break;
+            else {
+                finderStatus = true;
+                break;
+            }
+
         }
-        return false;
+        return finderStatus;
     }
 
     public void updateClientProfileName(Client client, String value)

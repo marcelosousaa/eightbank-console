@@ -41,6 +41,10 @@ public class ClientService {
             throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidValueException {
 
         String cpf = inputCPF();
+        if(cpf == null){
+            return false;
+        }
+
         double grossMonthlyIncome = inputGrossMonthlyIncome();
         String email = inputEmail();
         String name = inputName();
@@ -327,6 +331,8 @@ public class ClientService {
                     System.out.println("CPF inválido!");
                 } else if (clientDAO.searchClientByCPF(cpf)) {
                     System.err.println("Usuário já existente na base de dados!");
+                    cpf = null;
+                    break;
                 } else {
                     break;
                 }
@@ -922,6 +928,7 @@ public class ClientService {
 
         //CARTÕES
 
+
         //SEGUROS
 
 
@@ -933,10 +940,11 @@ public class ClientService {
 
         while (!runningTransferMenu) {
             System.out.println("Bem vindo ao menu de transferencias."
-                    + "Selecione uma opção no menu abaixo"
-                    + "1 - Transferencia para outro cliente Eightbank"
-                    + "2 - Pix"
-                    + "0 - Voltar");
+                    + "\nSelecione uma opção no menu abaixo"
+                    + "\n1 - Transferencia para outro cliente Eightbank"
+                    + "\n2 - Pix"
+                    + "\n3 - Utilizar cartao de credito"
+                    + "\n0 - Voltar");
 
             try {
                 transferMenuOption = new Scanner(System.in).nextInt();

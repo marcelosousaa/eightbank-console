@@ -32,27 +32,29 @@ public class EightbankConsoleApplication {
                             0 - Sair"""
             );
             try {
+
                 menuOption = new Scanner(System.in).nextInt();
                 if (menuOption < 0 || menuOption > 2) {
                     System.out.println("Opção inválida!");
                 } else {
                     switch (menuOption) {
                         case 1:
-                            if (clientService.clientRegistration()) {
-                                System.out.println("Cadastro realizado com sucesso!");
-                            } else {
-                                System.out.println("Houve um problema no cadastro. Vamos repetir?(S/N)");
-                                try {
-                                    char option = new Scanner(System.in).next().charAt(0);
-                                    if (option == 'N' || option == 'n') {
-                                        System.out.println("Encerrando...\n"
-                                                + "Obrigado por utilizar nosso sistema.");
-                                        System.exit(0);
-                                    } else {
-                                        break;
+                            boolean runningLoginMenu = false;
+
+                            while(!runningLoginMenu){
+                                if (clientService.clientRegistration()) {
+                                    System.out.println("Cadastro realizado com sucesso!");
+                                } else {
+                                    System.out.println("Houve um problema no cadastro. Vamos repetir?(S/N)");
+                                    try {
+                                        char option = new Scanner(System.in).next().charAt(0);
+                                        if (option == 'N' || option == 'n') {
+                                            System.out.println("Retornando ao menu...\n");
+                                            runningLoginMenu = true;
+                                        }
+                                    } catch (InputMismatchException e) {
+                                        System.out.println("Caracter inválido!");
                                     }
-                                } catch (InputMismatchException e) {
-                                    System.out.println("Caracter inválido!");
                                 }
                             }
                             break;
