@@ -427,6 +427,7 @@ public class ClientService {
         } else {
             currentAccountMonthlyFee = 0;
         }
+
         return currentAccountMonthlyFee;
     }
 
@@ -544,7 +545,7 @@ public class ClientService {
             try {
                 clientMenuOption = new Scanner(System.in).nextInt();
 
-                if (clientMenuOption < 0 || clientMenuOption > 6) {
+                if (clientMenuOption < 0 || clientMenuOption > 7) {
                     System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
                 }
 
@@ -618,10 +619,10 @@ public class ClientService {
                     + "\n0 - Voltar"
             );
 
-            try{
+            try {
                 int option = new Scanner(System.in).nextInt();
 
-                switch (option){
+                switch (option) {
                     case 1:
                         //Métodos pagamento via Conta Bancária
                         break;
@@ -634,7 +635,7 @@ public class ClientService {
                     default:
                         System.out.println(SystemMessages.INVALID_OPTION.getFieldName());
                 }
-            } catch (InputMismatchException e){
+            } catch (InputMismatchException e) {
                 System.out.println(SystemMessages.INVALID_CHARACTER.getFieldName());
             }
         } catch (InputMismatchException e) {
@@ -969,7 +970,16 @@ public class ClientService {
             if (account instanceof CurrentAccount) {
                 System.out.println("Taxa mensal: " + ((CurrentAccount) account).getAccountFee() + "\n");
             } else {
-                System.out.println("Rendimento anual: " + ((SavingsAccount) account).getAnnualPercentageYield() + "\n");
+                System.out.println("Rendimento anual: " + ((SavingsAccount) account).getAnnualPercentageYield());
+                for(int i = 1; i <= 5; i++){
+                    System.out.printf(
+                            "Previsão de rendimento em + %d ano(s): R$ %.2f", i, ((SavingsAccount) account).calculateYields(i)
+                    );
+                    System.out.println("\n");
+                }
+
+
+
             }
         }
 
